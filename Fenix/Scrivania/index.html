@@ -1,0 +1,174 @@
+<html>
+<head>
+    <title>Open json file</title>
+    <script src='jquery-3.3.1.js'></script>
+</head>
+
+<body>
+    <div id="demo">
+    <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+       <fieldset>
+        <h2>Json File</h2>
+            <input type='file' id='fileinput'>
+            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+        </fieldset>
+    </form>
+    </div>
+    
+    <script type="text/javascript">
+        //scelta del file json da leggere
+        function loadFile() {
+            var input, file, fr;
+        
+            if (typeof window.FileReader !== 'function') {
+                alert("The file API isn't supported on this browser yet.");
+                return;
+            }
+        
+            input = document.getElementById('fileinput');
+            if (!input) {
+                alert("Um, couldn't find the fileinput element.");
+            }
+            else if (!input.files) {
+                alert("This browser doesn't seem to support the `files` property of file inputs.");
+            }
+            else if (!input.files[0]) {
+                alert("Please select a file before clicking 'Load'");
+            }
+            else {
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = receivedText;
+                fr.readAsText(file);
+            }
+        
+            function receivedText(e) {
+                let lines = e.target.result;
+                var cont = JSON.parse(lines); 
+                
+                // document.getElementById("demo").innerHTML = cont.Optional_Roles;
+                ontologyParse(cont);
+            }
+        
+        }
+    //trova la stringa con il nome dell'operazione
+    function findOperation(element){
+        if(element.slice(0,4) != "http"){
+            var end = element.indexOf("http");
+            return element.substr(0,end-1);
+        }
+        else return null;
+    }
+
+    function getPrefix(element){
+        return element.slice(element.indexOf("www.")+4,element.indexOf(".it"));
+    }
+
+    function checkPrefix(element){
+        var prefix =  getPrefix(element);//trova prefix
+        //DEVE FARE IL CHECK SULLA MAPPA DEI PREFISSI. //----------DA IMPLEMENTARE
+        return true;
+    }
+    function getBody(element){
+        return element.slice(element.indexOf("#")+1,element.length);
+    }
+    
+    //parser dell'ontologia
+    function ontologyParse(cont){
+        if(cont.Sub_Concepts != undefined){ //nel json è presente la voce sub_concepts
+           for (let index = 0; index < cont.Sub_Concepts.length; index++) {
+                const element = cont.Sub_Concepts[index];
+                var operation = findOperation(element);
+
+                if(operation == null){//es[http://www.istat.it/ontology/poc/#Residente]
+
+                    if((checkPrefix(element))){
+                        var body = getBody(element);
+                        body = getPrefix(element)+":"+body;
+                        
+                        //ADESSO BODY LO DO IN PASTO A CYTOSCAPE COME SINGOLO ELEMENTO//-----------DA IMPLEMENTARE
+                    }
+                    else {
+                        //RILANCIA ERRORE MAPPA PREFISSI //-----------DA IMPLEMENTARE
+                    }
+                    
+                }
+                else if(operation == "ObjectUnionOf"){
+
+                    var couple = element.slice(element.indexOf("(")+1,element.indexOf(")"));
+                    couple = couple.split(" ");
+                    if(!(checkPrefix(couple[0]) || !(checkPrefix(couple[1])))){
+                        //RILANCIA ERRORE MAPPA PREFISSI //--------------DA IMPLEMENTARE
+                    }
+                    var body0 = getBody(couple[0]);
+                    body0 = getPrefix(element)+":"+body0;
+                    
+                    var body1 = getBody(couple[1]);
+                    body1 = getPrefix(element)+":"+body1;
+                    //ADESSO BODY0 E BODY1 Li DO IN PASTO A CYTOSCAPE COME EFFETTIVA UNIONE DEI DUE //-----------DA IMPLEMENTARE               
+                }
+                                      
+                
+
+           } 
+        } //FINE Sub_Concepts
+
+        if(cont.Super_Concepts != undefined){ //nel json è presente la voce sub_concepts
+            
+            for (let index = 0; index < cont.Super_Concepts.length; index++) {
+                const element = cont.Super_Concepts[index];
+                //posto che non ci siano altre cose tipo objectUnionOf
+                if((checkPrefix(element))){
+                    var body = getBody(element);
+                    body = getPrefix(element)+":"+body;
+                    //ADESSO BODY LO DO IN PASTO A CYTOSCAPE COME SINGOLO ELEMENTO//-----------DA IMPLEMENTARE
+                }
+                else {
+                    //RILANCIA ERRORE MAPPA PREFISSI //-----------DA IMPLEMENTARE
+                }
+                
+            }
+        }//FINE Super_Concepts
+
+        if(cont.Optional_Attributes != undefined){
+            for (let index = 0; index < cont.Optional_Attributes.length; index++) {
+                const element = cont.Optional_Attributes[index];
+                //posto che non ci siano altre cose tipo objectUnionOf
+                if((checkPrefix(element))){
+                    var body = getBody(element);
+                    body = getPrefix(element)+":"+body;
+                    //ADESSO BODY LO DO IN PASTO A CYTOSCAPE COME SINGOLO ELEMENTO//-----------DA IMPLEMENTARE
+                }
+                else {
+                    //RILANCIA ERRORE MAPPA PREFISSI //-----------DA IMPLEMENTARE
+                }
+                
+            }
+        }//FINE Optional_Attributes
+
+        if(cont.Mandatory_Attributes != undefined){
+            for (let index = 0; index < cont.Mandatory_Attributes.length; index++) {
+                const element = cont.Mandatory_Attributes[index];
+                //posto che non ci siano altre cose tipo objectUnionOf
+                if((checkPrefix(element))){
+                    var body = getBody(element);
+                    body = getPrefix(element)+":"+body;
+                    //ADESSO BODY LO DO IN PASTO A CYTOSCAPE COME SINGOLO ELEMENTO//-----------DA IMPLEMENTARE
+                }
+                else {
+                    //RILANCIA ERRORE MAPPA PREFISSI //-----------DA IMPLEMENTARE
+                }
+                
+            }
+        }//FINE Mandatory_Attributes
+
+
+
+    }
+        
+    </script>
+        
+</body>
+</html>
+
+
