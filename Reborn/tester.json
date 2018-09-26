@@ -1,0 +1,35 @@
+
+
+{
+   "Prefix_Map":[
+    "istat",
+    "cnr",
+    "wikipedia"
+   ],
+   "Optional_Roles":[
+      "http://www.istat.it/ontology/poc/#relazione_parentale",
+      "http://www.istat.it/ontology/poc/#ha_stato_residenza"
+   ],
+   "Optional_Attributes":[
+      "http://www.istat.it/ontology/poc/#descrizione_genere",
+      "http://www.istat.it/ontology/poc/#codice_individuo"
+   ],
+   "Super_Concepts":[
+      "http://www.istat.it/ontology/poc/#Essere_vivente"
+   ],
+   "Sub_Concepts":[ 
+      "ObjectUnionOf(http://www.istat.it/ontology/poc/#Femmina http://www.istat.it/ontology/poc/#Maschio)",
+      "ObjectUnionOf(ObjectUnionOf(http://www.istat.it/ontology/poc/#Persona_sana http://www.istat.it/ontology/poc/#Persona_malata) http://www.istat.it/ontology/poc/#Persona_non_in_vita)",
+      "http://www.istat.it/ontology/poc/#Residente"
+   ],
+   "Mandatory_Attributes":[
+      "http://www.istat.it/ontology/poc/#codice_genere",
+      "http://www.istat.it/ontology/poc/#data_nascita"
+   ],
+   "Mandatory_Roles":[
+      "http://www.istat.it/ontology/poc/#nato_in"
+   ],
+   "DLLite_Negative_Inclusion":[
+      "DisjointClasses(poc:Persona poc:Cane)"
+   ]
+}
