@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphol version="2">
+  <ontology>
+    <name>books_ontology</name>
+    <version>1.0</version>
+    <profile>OWL 2 QL</profile>
+    <IRI_prefixes_nodes_dict>
+      <iri iri_value="http://www.obdasystems.com/books/">
+        <prefixes/>
+        <nodes>
+          <node node_value="ConceptNode::PrintedBook:n6"/>
+          <node node_value="ConceptNode::E-Book:n4"/>
+          <node node_value="ConceptNode::AudioBook:n5"/>
+          <node node_value="ConceptNode::EmergingWriter:n9"/>
+          <node node_value="ConceptNode::Edition:n1"/>
+          <node node_value="AttributeNode::name:n14"/>
+          <node node_value="AttributeNode::name:n34"/>
+          <node node_value="AttributeNode::editionNumber:n16"/>
+          <node node_value="ConceptNode::EconomicEdition:n3"/>
+          <node node_value="AttributeNode::title:n17"/>
+          <node node_value="ConceptNode::UneditedBook:n10"/>
+          <node node_value="AttributeNode::genre:n18"/>
+          <node node_value="AttributeNode::dateOfPublication:n15"/>
+          <node node_value="ConceptNode::SpecialEdition:n2"/>
+          <node node_value="ConceptNode::Book:n7"/>
+          <node node_value="RoleNode::editedBy:n11"/>
+          <node node_value="RoleNode::writtenBy:n13"/>
+          <node node_value="ConceptNode::Author:n8"/>
+          <node node_value="ConceptNode::Editor:n0"/>
+          <node node_value="RoleNode::hasEdition:n12"/>
+        </nodes>
+        <properties>
+          <property property_value="display_in_widget"/>
+          <property property_value="Project_IRI"/>
+        </properties>
+      </iri>
+      <iri iri_value="http://www.w3.org/1999/02/22-rdf-syntax-ns">
+        <prefixes>
+          <prefix prefix_value="rdf"/>
+        </prefixes>
+        <nodes/>
+        <properties>
+          <property property_value="Standard_IRI"/>
+        </properties>
+      </iri>
+      <iri iri_value="http://www.w3.org/2000/01/rdf-schema">
+        <prefixes>
+          <prefix prefix_value="rdfs"/>
+        </prefixes>
+        <nodes/>
+        <properties>
+          <property property_value="Standard_IRI"/>
+        </properties>
+      </iri>
+      <iri iri_value="http://www.w3.org/2002/07/owl">
+        <prefixes>
+          <prefix prefix_value="owl"/>
+        </prefixes>
+        <nodes/>
+        <properties>
+          <property property_value="Standard_IRI"/>
+        </properties>
+      </iri>
+      <iri iri_value="http://www.w3.org/2001/XMLSchema">
+        <prefixes>
+          <prefix prefix_value="xsd"/>
+        </prefixes>
+        <nodes/>
+        <properties>
+          <property property_value="Standard_IRI"/>
+        </properties>
+      </iri>
+    </IRI_prefixes_nodes_dict>
+  </ontology>
+  <predicates>
+    <predicate type="attribute" name=":name">
+      <description status=""></description>
+      <functional>1</functional>
+    </predicate>
+    <predicate type="attribute" name=":genre">
+      <description status=""></description>
+      <functional>1</functional>
+    </predicate>
+    <predicate type="attribute" name=":dateOfPublication">
+      <description status=""></description>
+      <functional>1</functional>
+    </predicate>
+    <predicate type="attribute" name=":title">
+      <description status=""></description>
+      <functional>1</functional>
+    </predicate>
+    <predicate type="attribute" name=":editionNumber">
+      <description status=""></description>
+      <functional>1</functional>
+    </predicate>
+    <predicate type="role" name=":hasEdition">
+      <description status=""></description>
+      <functional>0</functional>
+      <inverseFunctional>1</inverseFunctional>
+      <asymmetric>0</asymmetric>
+      <irreflexive>0</irreflexive>
+      <reflexive>0</reflexive>
+      <symmetric>0</symmetric>
+      <transitive>0</transitive>
+    </predicate>
+    <predicate type="role" name=":editedBy">
+      <description status=""></description>
+      <functional>1</functional>
+      <inverseFunctional>0</inverseFunctional>
+      <asymmetric>0</asymmetric>
+      <irreflexive>0</irreflexive>
+      <reflexive>0</reflexive>
+      <symmetric>0</symmetric>
+      <transitive>0</transitive>
+    </predicate>
+  </predicates>
+  <diagrams>
+    <diagram name="books" height="10000" width="10000">
+      <node id="n30" type="domain-restriction" color="#fcfcfc">
+        <geometry y="-30" height="20" x="660" width="20"/>
+        <label y="-52" height="22" x="660" width="38">exists</label>
+      </node>
+      <node id="n4" type="concept" color="#fcfcfc" remaining_characters="E-Book">
+        <geometry y="310" height="50" x="450" width="110"/>
+        <label y="310" height="22" x="450" width="50">:E-Book</label>
+      </node>
+      <node id="n36" type="domain-restriction" color="#fcfcfc">
+        <geometry y="30" height="20" x="1010" width="20"/>
+        <label y="8" height="22" x="1010" width="38">exists</label>
+      </node>
+      <node id="n5" type="concept" color="#fcfcfc" remaining_characters="AudioBook">
+        <geometry y="310" height="50" x="600" width="110"/>
+        <label y="310" height="22" x="600" width="69">:AudioBook</label>
+      </node>
+      <node id="n40" type="range-restriction" color="#000000">
+        <geometry y="-240" height="20" x="270" width="20"/>
+        <label y="-262" height="22" x="270" width="38">exists</label>
+      </node>
+      <node id="n6" type="concept" color="#fcfcfc" remaining_characters="PrintedBook">
+        <geometry y="310" height="50" x="750" width="110"/>
+        <label y="310" height="22" x="750" width="76">:PrintedBook</label>
+      </node>
+      <node id="n34" type="attribute" color="#fcfcfc" remaining_characters="name">
+        <geometry y="30" height="20" x="1070" width="20"/>
+        <label y="8" height="22" x="1070" width="41">:name</label>
+      </node>
+      <node id="n2" type="concept" color="#fcfcfc" remaining_characters="SpecialEdition">
+        <geometry y="310" height="50" x="-130" width="110"/>
+        <label y="310" height="22" x="-130" width="87">:SpecialEdition</label>
+      </node>
+      <node id="n15" type="attribute" color="#fcfcfc" remaining_characters="dateOfPublication">
+        <geometry y="30" height="20" x="-120" width="20"/>
+        <label y="8" height="22" x="-120" width="105">:dateOfPublication</label>
+      </node>
+      <node id="n27" type="domain-restriction" color="#fcfcfc">
+        <geometry y="100" height="20" x="390" width="20"/>
+        <label y="78" height="22" x="390" width="38">exists</label>
+      </node>
+      <node id="n23" type="disjoint-union" color="#000000">
+        <geometry y="210" height="30" x="-10" width="50"/>
+      </node>
+      <node id="n11" type="role" color="#fcfcfc" remaining_characters="editedBy">
+        <geometry y="-80" height="50" x="-10" width="70"/>
+        <label y="-85" height="22" x="60" width="58">:editedBy</label>
+      </node>
+      <node id="n7" type="concept" color="#fcfcfc" remaining_characters="Book">
+        <geometry y="100" height="50" x="600" width="110"/>
+        <label y="100" height="22" x="600" width="38">:Book</label>
+      </node>
+      <node id="n42" type="complement" color="#fcfcfc">
+        <geometry y="0" height="30" x="390" width="50"/>
+        <label y="0" height="22" x="390" width="24">not</label>
+      </node>
+      <node id="n9" type="concept" color="#fcfcfc" remaining_characters="EmergingWriter">
+        <geometry y="200" height="50" x="1050" width="110"/>
+        <label y="200" height="22" x="1050" width="94">:EmergingWriter</label>
+      </node>
+      <node id="n41" type="value-domain" color="#fcfcfc">
+        <geometry y="-240" height="40" x="350" width="90"/>
+        <label y="-240" height="22" x="350" width="59">xsd:string</label>
+      </node>
+      <node id="n1" type="concept" color="#fcfcfc" remaining_characters="Edition">
+        <geometry y="100" height="50" x="-10" width="110"/>
+        <label y="100" height="22" x="-10" width="47">:Edition</label>
+      </node>
+      <node id="n28" type="domain-restriction" color="#fcfcfc">
+        <geometry y="210" height="20" x="290" width="20"/>
+        <label y="230" height="22" x="290" width="33">forall</label>
+      </node>
+      <node id="n3" type="concept" color="#fcfcfc" remaining_characters="EconomicEdition">
+        <geometry y="310" height="50" x="110" width="110"/>
+        <label y="310" height="22" x="110" width="100">:EconomicEdition</label>
+      </node>
+      <node id="n10" type="concept" color="#fcfcfc" remaining_characters="UneditedBook">
+        <geometry y="-170" height="50" x="550" width="110"/>
+        <label y="-170" height="22" x="550" width="86">:UneditedBook</label>
+      </node>
+      <node id="n13" type="role" color="#fcfcfc" remaining_characters="writtenBy">
+        <geometry y="100" height="50" x="820" width="70"/>
+        <label y="65" height="22" x="820" width="60">:writtenBy</label>
+      </node>
+      <node id="n33" type="domain-restriction" color="#fcfcfc">
+        <geometry y="100" height="20" x="720" width="20"/>
+        <label y="78" height="22" x="720" width="38">exists</label>
+      </node>
+      <node id="n38" type="range-restriction" color="#000000">
+        <geometry y="200" height="20" x="820" width="20"/>
+        <label y="220" height="22" x="820" width="29">(-,1)</label>
+      </node>
+      <node id="n8" type="concept" color="#fcfcfc" remaining_characters="Author">
+        <geometry y="100" height="50" x="1050" width="110"/>
+        <label y="100" height="22" x="1050" width="46">:Author</label>
+      </node>
+      <node id="n44" type="domain-restriction" color="#fcfcfc">
+        <geometry y="0" height="20" x="290" width="20"/>
+        <label y="-22" height="22" x="290" width="38">exists</label>
+      </node>
+      <node id="n14" type="attribute" color="#fcfcfc" remaining_characters="name">
+        <geometry y="-240" height="20" x="190" width="20"/>
+        <label y="-262" height="22" x="190" width="41">:name</label>
+      </node>
+      <node id="n29" type="range-restriction" color="#000000">
+        <geometry y="100" height="20" x="190" width="20"/>
+        <label y="78" height="22" x="190" width="38">exists</label>
+      </node>
+      <node id="n16" type="attribute" color="#fcfcfc" remaining_characters="editionNumber">
+        <geometry y="170" height="20" x="-170" width="20"/>
+        <label y="190" height="22" x="-165" width="89">:editionNumber</label>
+      </node>
+      <node id="n20" type="domain-restriction" color="#fcfcfc">
+        <geometry y="-240" height="20" x="130" width="20"/>
+        <label y="-262" height="22" x="130" width="38">exists</label>
+      </node>
+      <node id="n18" type="attribute" color="#fcfcfc" remaining_characters="genre">
+        <geometry y="20" height="20" x="720" width="20"/>
+        <label y="20" height="22" x="750" width="42">:genre</label>
+      </node>
+      <node id="n0" type="concept" color="#fcfcfc" remaining_characters="Editor">
+        <geometry y="-240" height="50" x="-10" width="110"/>
+        <label y="-240" height="22" x="-10" width="42">:Editor</label>
+      </node>
+      <node id="n22" type="range-restriction" color="#000000">
+        <geometry y="-150" height="20" x="-10" width="20"/>
+        <label y="-150" height="22" x="25" width="38">exists</label>
+      </node>
+      <node id="n31" type="domain-restriction" color="#fcfcfc">
+        <geometry y="20" height="20" x="660" width="20"/>
+        <label y="-2" height="22" x="660" width="38">exists</label>
+      </node>
+      <node id="n12" type="role" color="#fcfcfc" remaining_characters="hasEdition">
+        <geometry y="100" height="50" x="290" width="70"/>
+        <label y="65" height="22" x="255" width="67">:hasEdition</label>
+      </node>
+      <node id="n25" type="domain-restriction" color="#fcfcfc">
+        <geometry y="130" height="20" x="-120" width="20"/>
+        <label y="150" height="22" x="-115" width="38">exists</label>
+      </node>
+      <node id="n21" type="domain-restriction" color="#fcfcfc">
+        <geometry y="0" height="20" x="-10" width="20"/>
+        <label y="0" height="22" x="25" width="38">exists</label>
+      </node>
+      <node id="n24" type="domain-restriction" color="#fcfcfc">
+        <geometry y="70" height="20" x="-120" width="20"/>
+        <label y="90" height="22" x="-120" width="38">exists</label>
+      </node>
+      <node id="n32" type="range-restriction" color="#000000">
+        <geometry y="100" height="20" x="920" width="20"/>
+        <label y="78" height="22" x="920" width="38">exists</label>
+      </node>
+      <node id="n17" type="attribute" color="#fcfcfc" remaining_characters="title">
+        <geometry y="-30" height="20" x="720" width="20"/>
+        <label y="-30" height="22" x="745" width="29">:title</label>
+      </node>
+      <node id="n37" type="disjoint-union" color="#000000">
+        <geometry y="210" height="30" x="600" width="50"/>
+      </node>
+      <edge id="e2" type="input" source="n11" target="n21">
+        <point y="-80" x="-10"/>
+        <point y="0" x="-10"/>
+      </edge>
+      <edge id="e39" type="input" source="n13" target="n38">
+        <point y="100" x="820"/>
+        <point y="200" x="820"/>
+      </edge>
+      <edge id="e21" type="equivalence" source="n7" target="n30">
+        <point y="100" x="600"/>
+        <point y="-30" x="600"/>
+        <point y="-30" x="660"/>
+      </edge>
+      <edge id="e18" type="inclusion" source="n27" target="n7">
+        <point y="100" x="390"/>
+        <point y="100" x="600"/>
+      </edge>
+      <edge id="e24" type="input" source="n13" target="n33">
+        <point y="100" x="820"/>
+        <point y="100" x="720"/>
+      </edge>
+      <edge id="e22" type="equivalence" source="n7" target="n31">
+        <point y="75" x="620"/>
+        <point y="20" x="620"/>
+        <point y="20" x="660"/>
+      </edge>
+      <edge id="e27" type="inclusion" source="n9" target="n8">
+        <point y="200" x="1050"/>
+        <point y="100" x="1050"/>
+      </edge>
+      <edge id="e34" type="input" source="n6" target="n37">
+        <point y="310" x="750"/>
+        <point y="210" x="750"/>
+        <point y="210" x="600"/>
+      </edge>
+      <edge id="e6" type="equivalence" source="n21" target="n1">
+        <point y="0" x="-10"/>
+        <point y="100" x="-10"/>
+      </edge>
+      <edge id="e0" type="input" source="n14" target="n20">
+        <point y="-240" x="190"/>
+        <point y="-240" x="130"/>
+      </edge>
+      <edge id="e7" type="input" source="n2" target="n23">
+        <point y="310" x="-130"/>
+        <point y="210" x="-130"/>
+        <point y="210" x="-10"/>
+      </edge>
+      <edge id="e43" type="input" source="n14" target="n40">
+        <point y="-240" x="190"/>
+        <point y="-240" x="270"/>
+      </edge>
+      <edge id="e48" type="inclusion" source="n10" target="n42">
+        <point y="-170" x="550"/>
+        <point y="0" x="390"/>
+      </edge>
+      <edge id="e25" type="equivalence" source="n7" target="n33">
+        <point y="100" x="600"/>
+        <point y="100" x="720"/>
+      </edge>
+      <edge id="e4" type="inclusion" source="n22" target="n0">
+        <point y="-150" x="-10"/>
+        <point y="-240" x="-10"/>
+      </edge>
+      <edge id="e47" type="input" source="n44" target="n42">
+        <point y="0" x="290"/>
+        <point y="0" x="390"/>
+      </edge>
+      <edge id="e35" type="inclusion" source="n37" target="n7">
+        <point y="210" x="600"/>
+        <point y="100" x="600"/>
+      </edge>
+      <edge id="e36" type="inclusion" source="n4" target="n28">
+        <point y="285" x="410"/>
+        <point y="210" x="410"/>
+        <point y="210" x="290"/>
+      </edge>
+      <edge id="e20" type="input" source="n18" target="n31">
+        <point y="20" x="720"/>
+        <point y="20" x="660"/>
+      </edge>
+      <edge id="e46" type="input" source="n12" target="n44">
+        <point y="100" x="290"/>
+        <point y="0" x="290"/>
+      </edge>
+      <edge id="e33" type="input" source="n5" target="n37">
+        <point y="310" x="600"/>
+        <point y="210" x="600"/>
+      </edge>
+      <edge id="e15" type="input" source="n12" target="n28">
+        <point y="100" x="290"/>
+        <point y="210" x="290"/>
+      </edge>
+      <edge id="e1" type="inclusion" source="n0" target="n20">
+        <point y="-240" x="-10"/>
+        <point y="-240" x="130"/>
+      </edge>
+      <edge id="e44" type="inclusion" source="n40" target="n41">
+        <point y="-240" x="270"/>
+        <point y="-240" x="350"/>
+      </edge>
+      <edge id="e8" type="input" source="n3" target="n23">
+        <point y="310" x="110"/>
+        <point y="210" x="110"/>
+        <point y="210" x="-10"/>
+      </edge>
+      <edge id="e11" type="input" source="n16" target="n25">
+        <point y="170" x="-170"/>
+        <point y="130" x="-120"/>
+      </edge>
+      <edge id="e23" type="input" source="n13" target="n32">
+        <point y="100" x="820"/>
+        <point y="100" x="920"/>
+      </edge>
+      <edge id="e30" type="inclusion" source="n8" target="n36">
+        <point y="75" x="1010"/>
+        <point y="30" x="1010"/>
+      </edge>
+      <edge id="e40" type="inclusion" source="n9" target="n38">
+        <point y="200" x="1050"/>
+        <point y="200" x="820"/>
+      </edge>
+      <edge id="e3" type="input" source="n11" target="n22">
+        <point y="-80" x="-10"/>
+        <point y="-150" x="-10"/>
+      </edge>
+      <edge id="e13" type="equivalence" source="n25" target="n1">
+        <point y="130" x="-120"/>
+        <point y="100" x="-10"/>
+      </edge>
+      <edge id="e32" type="input" source="n4" target="n37">
+        <point y="310" x="450"/>
+        <point y="210" x="450"/>
+        <point y="210" x="600"/>
+      </edge>
+      <edge id="e29" type="input" source="n34" target="n36">
+        <point y="30" x="1070"/>
+        <point y="30" x="1010"/>
+      </edge>
+      <edge id="e10" type="input" source="n15" target="n24">
+        <point y="30" x="-120"/>
+        <point y="70" x="-120"/>
+      </edge>
+      <edge id="e19" type="input" source="n17" target="n30">
+        <point y="-30" x="720"/>
+        <point y="-30" x="660"/>
+      </edge>
+      <edge id="e38" type="inclusion" source="n10" target="n7">
+        <point y="-170" x="550"/>
+        <point y="75" x="550"/>
+      </edge>
+      <edge id="e16" type="input" source="n12" target="n29">
+        <point y="100" x="290"/>
+        <point y="100" x="190"/>
+      </edge>
+      <edge id="e26" type="inclusion" source="n32" target="n8">
+        <point y="100" x="920"/>
+        <point y="100" x="1050"/>
+      </edge>
+      <edge id="e37" type="input" source="n3" target="n28">
+        <point y="285" x="150"/>
+        <point y="210" x="150"/>
+        <point y="210" x="290"/>
+      </edge>
+      <edge id="e9" type="inclusion" source="n23" target="n1">
+        <point y="210" x="-10"/>
+        <point y="100" x="-10"/>
+      </edge>
+      <edge id="e17" type="inclusion" source="n29" target="n1">
+        <point y="100" x="190"/>
+        <point y="100" x="-10"/>
+      </edge>
+      <edge id="e12" type="equivalence" source="n24" target="n1">
+        <point y="70" x="-120"/>
+        <point y="100" x="-10"/>
+      </edge>
+      <edge id="e14" type="input" source="n12" target="n27">
+        <point y="100" x="290"/>
+        <point y="100" x="390"/>
+      </edge>
+    </diagram>
+  </diagrams>
+</graphol>
