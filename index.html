@@ -1,0 +1,197 @@
+<!doctype html>
+
+<html>
+
+<head>
+    <meta charset="utf-8"></meta>
+    <title>Tutorial 1: Getting Started</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.9/cytoscape.js"></script>
+    <!-- <script src='cytoscape.js'></script> -->
+    <script src='elems.js'></script>
+
+</head>
+
+<style>
+    #cy {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+    }
+</style>
+
+<body>
+    <div id="cy"></div>
+    
+    <script>
+        function NodeGenerator( n ){
+            for (var i = 0; i < n; i++) {
+                cy.add({
+                    group:"nodes",
+                    data: { id: 'node' + i ,type: 'concept'},
+                    position: { x: 200*i, y:450 }
+                    }
+                );
+                var source = 'node' + i;
+                cy.add({
+                    group:"edges",
+                    data: {
+                        id: 'edge' + i,
+                        source: source,
+                        target: 'b',
+                        type : 'descendant'
+                    }
+                });
+            }
+        }
+        function AttrNodeGenerator( iddi, targt, arrstyle){ //crea nodo concetto + exists + archi
+            
+            var ix = cy.$id(targt).position('x');
+            var iy = cy.$id(targt).position('y');
+           
+            cy.add([
+                { group:"nodes",data: { id: iddi, type: 'attribute' } }, //nodo giusto
+                { group:"nodes",data: { id: 'exists'+iddi, type: 'exists' },position: { x: ix+100, y: iy } }, //exists
+
+                {   
+                    group:"edges",
+                    data: { //edge nodo--->exists
+                    id: 'edgeExists'+iddi, 
+                    source: iddi,
+                    target: 'exists'+iddi,
+                    type: 'descendant' } 
+                },
+                { 
+                    group:"edges",                    
+                    data: { //edge exists--->target
+                    id: 'edgetarget'+iddi, 
+                    source: 'exists'+iddi,
+                    target: targt,
+                    type: arrstyle } 
+                }
+
+            ]);
+        }
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: Elems,
+            layout: {
+                name: 'breadthfirst',
+                roots:'node[id = "Book"]', //posso lasciare cosi tanto quando mi prenderò la root
+                spacingFactor: 1,      //io ho già scansionato tutto e so chi è
+                avoidOverlap: true,
+                fit: true,
+                padding: 50
+            },
+            style: [
+            {
+                selector: 'node[type = "ouo"]',
+                style: {
+                    shape: 'hexagon',
+                    height: 20,
+                    'background-color': 'black'
+                    
+                }
+            },
+            {
+                selector:'node[type = "concept"]',
+                style:{
+                    shape:'rectangle',
+                    height:30,
+                    width: 70,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    label: 'data(id)',
+                    'text-valign' : 'center',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                }
+            },
+            {
+                selector: 'node[type = "exists"]',
+                style: {
+                    shape: 'rectangle',
+                    height: 12,
+                    width: 12,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    label: 'exists',
+                    'text-valign' : 'top',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                    
+                }
+            },
+            {
+                selector:'node[type = "attribute"]',
+                style:{
+                    shape:'ellipse',
+                    height: 15,
+                    width: 15,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    label: 'data(id)',
+                    'text-valign' : 'center',
+                    'text-halign' : 'right',
+                    'font-size' : 10
+                }
+            },
+            {
+                selector:'edge[type = "normal"]',
+                style:{
+                    'width': 1,
+                    'curve-style': 'bezier',
+                    'line-color' : 'black',
+                    'target-arrow-color': 'black',
+                    'target-arrow-shape': 'triangle'
+                }
+            },
+            {
+                selector:'edge[type = "doublenormal"]',
+                style:{
+                    'width': 1,
+                    'curve-style': 'bezier',
+                    'line-color' : 'black',
+                    'target-arrow-color': 'black',
+                    'target-arrow-shape': 'triangle',
+                    'source-arrow-color': 'black',
+                    'source-arrow-shape': 'triangle'
+                }
+            },
+            {
+                selector:'edge[type = "descendant"]',
+                style:{
+                    'width': 1,
+                    'curve-style': 'bezier',
+                    'line-color' : 'grey',
+                    'line-style' : 'dashed',
+                    'target-arrow-shape': 'diamond',
+                    'target-arrow-color': 'black',
+                    'target-arrow-fill': 'hollow',
+                    'arrow-scale': 1.2
+                    
+                }
+                
+            }]
+            });
+            
+            // cy.layout({
+            //     name: 'breadthfirst',
+            //     roots:'node[id = "Book"]',
+            //     spacingFactor: 1,
+            //     avoidOverlap: true,
+            //     fit: true,
+            //     padding: 50
+            // });
+            
+            //NodeGenerator(5);
+            AttrNodeGenerator(':title','Book','doublenormal');
+            
+            
+        
+    </script>
+</body>
