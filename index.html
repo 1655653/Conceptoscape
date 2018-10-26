@@ -368,19 +368,13 @@
                 spacingFactor: 1,      //io ho già scansionato tutto e so chi è
                 avoidOverlap: true,
                 fit: true,
-                padding: 50,
-                animate: true,
-                animationDuration: 500
+                padding: 50
+                // animate: true,
+                // animationDuration: 500
             }).run();
 
-            //FakeAttrGen();
-            var h = cy.$id(':genre');
+            FakeAttrGen();
             
-            cy.add( { group: "nodes", data: { id: "n0" }, position: { x: h.position('x'), y: h.position('y') } });
-            console.log(h.position());
-            console.log(cy.$id('n0').position());
-            
-
 
 
             var compAtrr = cy.$('node[type = "complexAttribute"]');
@@ -411,7 +405,7 @@
                 });
             });
             
-            //console.log(cy.$('node[type = "fakeAttribute"]').eq(1).position());
+            
 
             
 
