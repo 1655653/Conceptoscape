@@ -4,9 +4,13 @@
 
 <head>
     <meta charset="utf-8"></meta>
-    <title>Tutorial 1: Getting Started</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.9/cytoscape.js"></script>
-    <!-- <script src='cytoscape.js'></script> -->
+    <title>Conceptoscape</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.18/cytoscape.js"></script>
+
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.6.0/cola.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-qtip/2.7.0/cytoscape-qtip.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.6.0/cytoscape-cola.js"></script>
+
     <script src='elems.js'></script>
 
 </head>
@@ -25,6 +29,7 @@
     <div id="cy"></div>
     
     <script>
+        
         function NodeGenerator( n ){
             for (var i = 0; i < n; i++) {
                 cy.add({
@@ -45,28 +50,45 @@
                 });
             }
         }
-        function AttrNodeGenerator( iddi, targt, arrstyle){ //crea nodo concetto + exists + archi
+        
+        function FakeAttrGen(){
+            var d = cy.$("node[type = 'complexAttribute']");
+            for (let i = 0; i < d.length; i++) {
+                var ix = d[i].position('x');
+                var iy = d[i].position('y');
+                var iddi = d[i].data('id');
+                cy.add([
+                    {
+                    group:'nodes',
+                    data: { id: iddi+'fake', type: 'fakeAttribute'},
+                    position:{ x: ix , y: iy}
+                    }
+                ]);
+            }
+        }
+
+        
+        function SimpleAttrRoleGenerator( src, targt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
             
-            var ix = cy.$id(targt).position('x');
-            var iy = cy.$id(targt).position('y');
+            
            
             cy.add([
-                { group:"nodes",data: { id: iddi, type: 'attribute' } }, //nodo giusto
-                { group:"nodes",data: { id: 'exists'+iddi, type: 'exists' },position: { x: ix+100, y: iy } }, //exists
+                { group:"nodes",data: { id: src, type: typ }}, //nodo giusto
+                { group:"nodes",data: { id: 'exists'+src+targt, type: colorExists }}, //exists
 
                 {   
                     group:"edges",
                     data: { //edge nodo--->exists
-                    id: 'edgeExists'+iddi, 
-                    source: iddi,
-                    target: 'exists'+iddi,
+                    id: 'edgeExists'+src+targt, 
+                    source: src,
+                    target: 'exists'+src+targt,
                     type: 'descendant' } 
                 },
                 { 
                     group:"edges",                    
                     data: { //edge exists--->target
-                    id: 'edgetarget'+iddi, 
-                    source: 'exists'+iddi,
+                    id: 'edgetarget'+src+targt, 
+                    source: 'exists'+src+targt,
                     target: targt,
                     type: arrstyle } 
                 }
@@ -75,22 +97,29 @@
         }
         var cy = cytoscape({
             container: document.getElementById('cy'),
-            elements: Elems,
-            layout: {
-                name: 'breadthfirst',
-                roots:'node[id = "Book"]', //posso lasciare cosi tanto quando mi prenderò la root
-                spacingFactor: 1,      //io ho già scansionato tutto e so chi è
-                avoidOverlap: true,
-                fit: true,
-                padding: 50
-            },
-            style: [
+            
+            style: [        //STILE NODI
             {
                 selector: 'node[type = "ouo"]',
                 style: {
                     shape: 'hexagon',
-                    height: 20,
+                    height: 18,
                     'background-color': 'black'
+                    
+                }
+            },
+            {
+                selector: 'node[type = "andornot"]',
+                style: {
+                    shape: 'hexagon',
+                    label: 'data(id)',
+                    height: 18,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    'text-valign' : 'center',
+                    'text-halign' : 'center',
+                    'font-size' : 10
                     
                 }
             },
@@ -110,7 +139,52 @@
                 }
             },
             {
-                selector: 'node[type = "exists"]',
+                selector:'node[type = "value_domain"]',
+                style:{
+                    shape:'roundrectangle',
+                    height:30,
+                    width: 70,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    label: 'data(id)',
+                    'text-valign' : 'center',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                }
+            },
+            {
+                selector:'node[type = "simpleRole"]',
+                style:{
+                    shape:'diamond',
+                    height:30,
+                    width: 70,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    label: 'data(id)',
+                    'text-valign' : 'top',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                }
+            },
+            {
+                selector:'node[type = "complexRole"]',
+                style:{
+                    shape:'diamond',
+                    height:30,
+                    width: 70,
+                    'background-color': 'white',
+                    'border-width':4,
+                    'border-color':'black',
+                    label: 'data(id)',
+                    'text-valign' : 'top',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                }
+            },
+            {
+                selector: 'node[type = "existsW"]',
                 style: {
                     shape: 'rectangle',
                     height: 12,
@@ -126,7 +200,21 @@
                 }
             },
             {
-                selector:'node[type = "attribute"]',
+                selector: 'node[type = "existsB"]',
+                style: {
+                    shape: 'rectangle',
+                    height: 12,
+                    width: 12,
+                    'background-color': 'black',
+                    label: 'exists',
+                    'text-valign' : 'top',
+                    'text-halign' : 'center',
+                    'font-size' : 10
+                    
+                }
+            },
+            {
+                selector:'node[type = "simpleAttribute"],[type = "complexAttribute"]',
                 style:{
                     shape:'ellipse',
                     height: 15,
@@ -141,6 +229,18 @@
                 }
             },
             {
+                selector:'node[type = "fakeAttribute"]',
+                style:{
+                    shape:'ellipse',
+                    height: 10,
+                    width: 10,
+                    'background-color': 'white',
+                    'border-width':0.5,
+                    'border-color':'black',
+                    
+                }
+            },
+            {           //STILE ARCHI
                 selector:'edge[type = "normal"]',
                 style:{
                     'width': 1,
@@ -179,19 +279,156 @@
             }]
             });
             
+            //ARCHI E NODI MESSI A MANO
+            cy.add([
+                {
+                group:'nodes',
+                data: { id: 'Book', type: 'concept'},
+                },
+                {
+                group:'nodes',
+                data: { id: 'b', type: 'ouo'},
+                },
+                {
+                group:'nodes',
+                data: { id: 'E-book', type: 'concept'},
+                },
+                {
+                group:'nodes',
+                data: { id: 'AudioBook', type: 'concept'},
+                },
+                {
+                group:'nodes',
+                data: { id: 'PrintedBook', type: 'concept'},
+                },
+                {
+                group:'nodes',
+                data: { id: ':writtenBy', type: 'complexRole'},
+                },
+                {
+                group:'edges',
+                data: {
+                    id: 'Bookb',
+                    source: 'b',
+                    target: 'Book',
+                    type:'normal'
+                }
+                },
+                {
+                group:'edges',
+                data: {
+                    id: 'bE-book',
+                    source: 'E-book',
+                    target: 'b',
+                    type:'descendant'
+                }
+                },
+                {
+                group:'edges',
+                data: {
+                    id: 'bAudioBook',
+                    source: 'AudioBook',
+                    target: 'b',
+                    type:'descendant'
+                }
+                },
+                {
+                group:'edges',
+                data: {
+                    id: 'bPrintedBook',
+                    source: 'PrintedBook',
+                    target: 'b',
+                    type:'descendant'
+                }
+                }
+            ]);
+            
+            
+            // NodeGenerator(10);
+            SimpleAttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
+            SimpleAttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
+            SimpleAttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
+            
+            
             // cy.layout({
-            //     name: 'breadthfirst',
-            //     roots:'node[id = "Book"]',
-            //     spacingFactor: 1,
-            //     avoidOverlap: true,
-            //     fit: true,
-            //     padding: 50
-            // });
-            
-            //NodeGenerator(5);
-            AttrNodeGenerator(':title','Book','doublenormal');
+            //     name: 'cola',
+            //     maxSimulationTime: 500,
+            //     fit:true,
+            //     padding: 40
+
+            // }).run();
             
             
-        
+            
+            
+            
+            cy.layout({
+                name: 'breadthfirst',
+                roots:'node[id = "Book"]', //posso lasciare cosi tanto quando mi prenderò la root
+                spacingFactor: 1,      //io ho già scansionato tutto e so chi è
+                avoidOverlap: true,
+                fit: true,
+                padding: 50,
+                animate: true,
+                animationDuration: 500
+            }).run();
+
+            //FakeAttrGen();
+            var h = cy.$id(':genre');
+            
+            cy.add( { group: "nodes", data: { id: "n0" }, position: { x: h.position('x'), y: h.position('y') } });
+            console.log(h.position());
+            console.log(cy.$id('n0').position());
+            
+
+
+
+            var compAtrr = cy.$('node[type = "complexAttribute"]');
+            compAtrr.on('grabon drag',function(evt){
+                var node = evt.target;
+                var idnode = node.data('id');
+                var fakenode = cy.$id(idnode+'fake');
+                var ix = node.position('x');
+                var iy = node.position('y');
+                fakenode.position({
+                    x: ix,
+                    y: iy
+                });
+            });
+
+            var fakeAtrr = cy.$('node[type = "fakeAttribute"]');
+            fakeAtrr.on('grabon drag',function(evt){
+                var node = evt.target;
+                var idnode = node.data('id');
+                var l = idnode.length;
+                idnode = idnode.slice(0,l-4);
+                var realnode = cy.$id(idnode);
+                var ix = node.position('x');
+                var iy = node.position('y');
+                realnode.position({
+                    x: ix,
+                    y: iy
+                });
+            });
+            
+            //console.log(cy.$('node[type = "fakeAttribute"]').eq(1).position());
+
+            
+
     </script>
 </body>
+
+
+
+<!-- //CONCENTRIC LAYOUT
+
+            
+cy.layout({
+    name: 'concentric',
+    concentric: function( node ){
+        return node.degree();
+    },
+    levelWidth: function( nodes ){
+        return 2;
+    }
+}).run(); -->
