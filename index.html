@@ -28,220 +28,8 @@
 
 <body>
     <div id="cy"></div>
-    
     <script>
-        function NodeGenerator( n ){
-            for (var i = 0; i < n; i++) {
-                cy.add({
-                    group:"nodes",
-                    data: { id: 'node' + i ,type: 'subConcept'},
-                    position: { x: 200*i, y:450 }
-                    }
-                );
-                var source = 'node' + i;
-                cy.add({
-                    group:"edges",
-                    data: {
-                        id: 'edge' + i,
-                        source: source,
-                        target: 'b',
-                        type : 'descendant'
-                    }
-                });
-            }
-        }
-        
-        function FakeAttrGen(){
-            var d = cy.$("node[type = 'complexAttribute']");
-            for (let i = 0; i < d.length; i++) {
-                var ix = d[i].position('x');
-                var iy = d[i].position('y');
-                var iddi = d[i].data('id');
-                cy.add([
-                    {
-                    group:'nodes',
-                    data: { id: iddi+'fake', type: 'fakeAttribute'},
-                    position:{ x: ix , y: iy}
-                    }
-                ]);
-            }
-        }
-
-        
-        function SimpleAttrRoleGenerator( src, targt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
-            
-            
-           
-            cy.add([
-                { group:"nodes",data: { id: src, type: typ }}, //nodo giusto
-                { group:"nodes",data: { id: 'exists'+src+targt, type: colorExists }}, //exists
-
-                {   
-                    group:"edges",
-                    data: { //edge nodo--->exists
-                    id: 'edgeExists'+src+targt, 
-                    source: src,
-                    target: 'exists'+src+targt,
-                    type: 'descendant' } 
-                },
-                { 
-                    group:"edges",                    
-                    data: { //edge exists--->target
-                    id: 'edgetarget'+src+targt, 
-                    source: 'exists'+src+targt,
-                    target: targt,
-                    type: arrstyle } 
-                }
-
-            ]);
-        }
-        
-        var cy = cytoscape({
-            container: document.getElementById('cy'),
-            style: stile
-        });
-            
-        //ARCHI E NODI MESSI A MANO
-        
-        cy.add([
-            {
-            group:'nodes',
-            data: { id: 'Book', type: 'starConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'b', type: 'subOuo'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'E-book', type: 'subConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'AudioBook', type: 'subConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'PrintedBook', type: 'subConcept'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'Bookb',
-                source: 'b',
-                target: 'Book',
-                type:'normal'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bE-book',
-                source: 'E-book',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bAudioBook',
-                source: 'AudioBook',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bPrintedBook',
-                source: 'PrintedBook',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            //nodi esempio-------------------------------------
-            {
-            group:'nodes',
-            data: { id: 'be', type: 'subOuo'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'Bookbe',
-                source: 'be',
-                target: 'Book',
-                type:'normal'
-            }
-            },
-            {
-            group:'nodes',
-            data: { id: 'Educational', type: 'subConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'Tutorial', type: 'subConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'Literature', type: 'subConcept'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beEducational',
-                source: 'Educational',
-                target: 'be',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beTutorial',
-                source: 'Tutorial',
-                target: 'be',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beLiterature',
-                source: 'Literature',
-                target: 'be',
-                type:'descendant'
-            }
-            }
-            
-        ]);
-        
-        
-        // NodeGenerator(10);
-        SimpleAttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
-        SimpleAttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
-        SimpleAttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
-        
-        
-        cy.layout({
-            name:'preset',
-
-        }).run(); 
-        
-        var nodes = cy.nodes('node');
-
-        var elenco = {
-            attribute: [],
-            role: [],
-            subOuo: [],
-            superOuo: []
-        };
-
-        for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i];
-            Grapholy( node);
-        }
-
+        //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL
         function Grapholy( node ){
             var star = cy.$id('Book');
             var starx = star.position('x');
@@ -301,7 +89,7 @@
                 })
             }
             
-            else if(node.data('type') == "subOuo" || node.data('type') == "andornot"){
+            else if(node.data('type') == "subOuo" || node.data('type') == "subAndornot"){
                 
 
                 var min = Math.ceil(-180);
@@ -325,7 +113,7 @@
                 
 
 
-                subConcetti = node.incomers('node[type = "subConcept"]');
+                var subConcetti = node.incomers('node[type = "subConcept"]');
                 var ouox = node.position('x');
                 var ouoy = node.position('y');
                 var range = subConcetti.length * 90 //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO) 
@@ -344,8 +132,6 @@
 
                 elenco.subOuo.push(stop);
                     
-                console.log(start)
-                console.log(stop)
                 for (let i = 0; i < subConcetti.length; i++) {
                     const nodeSubCon = subConcetti[i];
                     nodeSubCon.position({
@@ -357,14 +143,285 @@
                 }
 
             }
-   
+            
+            else if(node.data('type') == "superOuo" || node.data('type') == "superAndornot"){
+                var min = Math.ceil(-180);
+                var max = Math.floor(180);
+                var n = Math.floor(Math.random() * (max - min + 1)) + min;
+
+
+                node.position('y',stary - 90);
+
+                if(elenco.superOuo.length == 0){ ///primo nodo ouo
+                    node.position('x',starx + n);
+                }
+
+                for (let i = 0; i < elenco.superOuo.length; i++) {
+                    const element = elenco.superOuo[i];
+                    while(n<element){
+                        n = n+5;
+                    }     
+                    node.position('x',n);
+                }
+                
+
+
+                var superConcetti = node.incomers('node[type = "superConcept"]');
+                var ouox = node.position('x');
+                var ouoy = node.position('y');
+                var range = superConcetti.length * 90 //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO) 
+                var start = ouox - (range/2);
+                var stop = ouox + (range/2);
+
+                
+
+                for (let i = 0; i < elenco.superOuo.length; i++) {
+                    var element = elenco.superOuo[i];
+                    while( start<element ){
+                        start = start+5;
+                        stop = stop+5;
+                    }
+                }
+
+                elenco.superOuo.push(stop);
+                    
+                
+                for (let i = 0; i < superConcetti.length; i++) {
+                    const nodeSupCon = superConcetti[i];
+                    nodeSupCon.position({
+                        x: start,
+                        y: ouoy - 90
+                    });
+                    start += 90;
+                    
+                }
+
+            }
+        }
+    </script>
+    <script>
+        function NodeGenerator( n ){
+            for (var i = 0; i < n; i++) {
+                cy.add({
+                    group:"nodes",
+                    data: { id: 'node' + i ,type: 'subConcept'},
+                    position: { x: 200*i, y:450 }
+                    }
+                );
+                var source = 'node' + i;
+                cy.add({
+                    group:"edges",
+                    data: {
+                        id: 'edge' + i,
+                        source: source,
+                        target: 'b',
+                        type : 'descendant'
+                    }
+                });
+            }
+        }
+        
+        //GENERATORE DEI NODI FAKE
+        function FakeAttrGen(){
+            var d = cy.$("node[type = 'complexAttribute']");
+            for (let i = 0; i < d.length; i++) {
+                var ix = d[i].position('x');
+                var iy = d[i].position('y');
+                var iddi = d[i].data('id');
+                cy.add([
+                    {
+                    group:'nodes',
+                    data: { id: iddi+'fake', type: 'fakeAttribute'},
+                    position:{ x: ix , y: iy}
+                    }
+                ]);
+            }
+        }
+
+        //GENERATORE DI RUOLI E ATTRIBUTI 
+        function AttrRoleGenerator( src, targt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
+            cy.add([
+                { group:"nodes",data: { id: src, type: typ }}, //creo nodo giusto
+                { group:"nodes",data: { id: 'exists'+src+targt, type: colorExists }}, //creo nodo exists
+
+                {   
+                    group:"edges",
+                    data: { // creo edge nodo--->exists
+                    id: 'edgeExists'+src+targt, 
+                    source: src,
+                    target: 'exists'+src+targt,
+                    type: 'descendant' } 
+                },
+                { 
+                    group:"edges",                    
+                    data: { //creo edge exists--->target
+                    id: 'edgetarget'+src+targt, 
+                    source: 'exists'+src+targt,
+                    target: targt,
+                    type: arrstyle } 
+                }
+
+            ]);
+        }
+        
+        //CREAZIONE DELL ELEMENTO CY 
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            style: stile
+        });
+            
+        //INIZIO MAIN
+            
+            //inizio creazione di archi e nodi messi a mano di concetti (sup,super,star)
+        cy.add([
+            {
+            group:'nodes',
+            data: { id: 'Book', type: 'starConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'b', type: 'superOuo'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'E-book', type: 'superConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'AudioBook', type: 'superConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'PrintedBook', type: 'superConcept'},
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'Bookb',
+                source: 'b',
+                target: 'Book',
+                type:'normal'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'bE-book',
+                source: 'E-book',
+                target: 'b',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'bAudioBook',
+                source: 'AudioBook',
+                target: 'b',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'bPrintedBook',
+                source: 'PrintedBook',
+                target: 'b',
+                type:'descendant'
+            }
+            },
+            //nodi esempio-------------------------------------
+            {
+            group:'nodes',
+            data: { id: 'be', type: 'superOuo'},
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'Bookbe',
+                source: 'be',
+                target: 'Book',
+                type:'normal'
+            }
+            },
+            {
+            group:'nodes',
+            data: { id: 'Educational', type: 'superConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'Tutorial', type: 'superConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'Literature', type: 'superConcept'},
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beEducational',
+                source: 'Educational',
+                target: 'be',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beTutorial',
+                source: 'Tutorial',
+                target: 'be',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beLiterature',
+                source: 'Literature',
+                target: 'be',
+                type:'descendant'
+            }
+            }
+            
+        ]);
+            //fine creazione di archi e nodi messi a mano di concetti (sup,super,star)
+            
+            //inizio creazione di ruoli e attributi
+        AttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
+        AttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
+        // NodeGenerator(10);
+        AttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
+            //inizio creazione di ruoli e attributi
+            
+        //FINE MAIN
+        
+        //INIZIO GESTIONE DEL LAYOUT
+        
+        cy.layout({
+            name:'preset',
+
+        }).run(); 
+        
+        var nodes = cy.nodes('node');
+
+        var elenco = {
+            attribute: [],
+            role: [],       //strutt.dati per le coordinate
+            subOuo: [],
+            superOuo: []
+        };
+
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            Grapholy( node);
         }
 
         cy.fit(cy.$id("Book"),275);
+        //FINE GESTIONE LAYOUT
         
-       FakeAttrGen();
-
-            
+        //INIZIO GESTIONE FAKE ATTRIBUTES
+        FakeAttrGen();
 
         var compAtrr = cy.$('node[type = "complexAttribute"]');
         compAtrr.on('grabon drag',function(evt){
@@ -393,10 +450,13 @@
                 y: iy
             });
         });
+        //FINE GESTIONE FAKE ATTRIBUTES
+
             
             
 
             
 
     </script>
+    
 </body>
