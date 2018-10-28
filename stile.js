@@ -9,10 +9,10 @@ var stile= [        //STILE NODI
         }
     },
     {
-        selector: 'node[type = "andornot"]',
+        selector: 'node[type = "superAndornot"],[type = "subAndornot"]',
         style: {
             shape: 'hexagon',
-            label: 'data(id)',
+            label: 'data(andornot)',
             height: 18,
             'background-color': 'white',
             'border-width':0.5,
@@ -54,7 +54,28 @@ var stile= [        //STILE NODI
         }
     },
     {
-        selector:'node[type = "simpleRole"]',
+        selector:'node[type = "fakeRole"]',
+        style:{
+            height:30,
+            width: 70,
+            shape:"polygon",
+            'background-color' : 'black',
+            'shape-polygon-points': '0 -1, 1 0, 0 1, 0 0.8, 0.8 0, 0 -0.8'
+        }
+    },
+    {
+        selector:'node[type = "simpleFakeRole"]',
+        style:{
+            shape:'diamond',
+            height:25,
+            width: 60,
+            'background-color': 'white',
+            'border-width':1,
+            'border-color':'black',
+        }
+    },
+    {
+        selector:'node[type = "simpleRole"],[type = "doubleComplexRole"]',
         style:{
             shape:'diamond',
             height:30,

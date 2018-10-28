@@ -62,7 +62,7 @@
                 })
             }
             
-            else if(node.data('type') == "simpleRole" || node.data('type') == "complexRole"){
+            else if(node.data('type') == "simpleRole" || node.data('type') == "complexRole" || node.data('type') == "doubleComplexRole" ){
                 nodeRoleid = node.data('id');
                 var nodeExists = cy.$id('exists'+nodeRoleid+'Book');
                 var min = Math.ceil(-35);
@@ -198,30 +198,59 @@
 
             }
         }
-    </script>
-    <script>
-        function NodeGenerator( n ){
-            for (var i = 0; i < n; i++) {
-                cy.add({
-                    group:"nodes",
-                    data: { id: 'node' + i ,type: 'subConcept'},
-                    position: { x: 200*i, y:450 }
-                    }
-                );
-                var source = 'node' + i;
-                cy.add({
-                    group:"edges",
-                    data: {
-                        id: 'edge' + i,
-                        source: source,
-                        target: 'b',
-                        type : 'descendant'
-                    }
+
+        //GESTORE DEI NODI FAKE, LAYOUT
+        function FakeManager(){
+            var compAtrr = cy.$('node[type = "complexAttribute"],[type = "doubleComplexRole"]');
+            compAtrr.on('grabon drag',function(evt){
+                var node = evt.target;
+                var idnode = node.data('id');
+                var fakenode = cy.$id(idnode+'fake');
+                var ix = node.position('x');
+                var iy = node.position('y');
+                fakenode.position({
+                    x: ix,
+                    y: iy
                 });
-            }
+            });
+
+            var fakeAtrr = cy.$('node[type = "fakeAttribute"],[type = "fakeRole"]');
+            fakeAtrr.on('grabon drag',function(evt){
+                var node = evt.target;
+                var idnode = node.data('id');
+                var l = idnode.length;
+                idnode = idnode.slice(0,l-4);
+                var realnode = cy.$id(idnode);
+                var ix = node.position('x');
+                var iy = node.position('y');
+                realnode.position({
+                    x: ix,
+                    y: iy
+                });
+            });
+
+            var sfr = cy.$('node[type = "simpleFakeRole"]');
+            sfr.on('grabon drag',function(evt){
+                var node = evt.target;
+                var idnode = node.data('id');
+                var l = idnode.length;
+                idnode = idnode.slice(4);
+                var realnode = cy.$id(idnode);
+                var ix = node.position('x');
+                var iy = node.position('y');
+                realnode.position({
+                    x: ix,
+                    y: iy
+                });
+                var fakeRole = cy.$id(idnode+"fake");
+                fakeRole.position({
+                    x: ix,
+                    y: iy
+                });
+            });
         }
-        
-        //GENERATORE DEI NODI FAKE
+
+        //GENERATORE DEI NODI ATTRIBUTO FAKE
         function FakeAttrGen(){
             var d = cy.$("node[type = 'complexAttribute']");
             for (let i = 0; i < d.length; i++) {
@@ -237,6 +266,84 @@
                 ]);
             }
         }
+
+        //GENERATORE DEI NODI RUOLO FAKE
+        function FakeRoleGen(){
+            var d = cy.$("node[type = 'doubleComplexRole']");
+            for (let i = 0; i < d.length; i++) {
+                var ix = d[i].position('x');
+                var iy = d[i].position('y');
+                var iddi = d[i].data('id');
+                cy.add([
+                    {
+                    group:'nodes',
+                    data: { id: iddi+'fake', type: 'fakeRole'},
+                    position:{ x: ix , y: iy}
+                    },
+                    {
+                    group:'nodes',
+                    data: { id: 'fake'+iddi, type: 'simpleFakeRole'},
+                    position:{ x: ix , y: iy},
+                    }
+                ]);
+            }
+
+        }
+        
+        //GENERATORE DI SUPER E SUB CONCETTI
+        function SubSuperConceptGenerator(src, ouoStarArr, typeConcept, typeOuo, ouoConceptArr, aonName){ //src è una str dati
+            //ouoStarArr--> tipo arco che va da ouo a star
+            //typeConcept--> tipo dei concetti figli (sub o super)
+            //typeouo--> tipo degli (sub o super / andornot o ouo)
+            //ouoStarArr--> tipo arco che va da ouo a star
+            //aonName--> node che deve apparire nel ouo solo nel caso in cui è andornot
+            if(typeOuo == "superAndornot" || typeOuo == "subAndornot"){
+                cy.add([
+                    {group: 'nodes', data: { id: 'ouo'+src[0], type: typeOuo, andornot: aonName}},
+                    {
+                        group: 'edges', 
+                        data:{
+                            id: 'ouo'+'Book'+src[0],
+                            source: 'ouo'+src[0],
+                            target: 'Book',
+                            type:ouoStarArr
+                        }
+                    }
+                ]);
+            }
+            else{
+                cy.add([
+                    {group: 'nodes', data: { id: 'ouo'+src[0], type: typeOuo}},
+                    {
+                        group: 'edges', 
+                        data:{
+                            id: 'ouo'+'Book'+src[0],
+                            source: 'ouo'+src[0],
+                            target: 'Book',
+                            type:ouoStarArr
+                        }
+                    }
+                ]);
+            }
+                
+            for (let i = 0; i < src.length; i++) {
+                const el = src[i];
+                cy.add([
+                    {group: 'nodes', data: { id: el, type: typeConcept}}, //nodo concetto per ogni src
+                    {
+                        group: 'edges', 
+                        data:{
+                            id: 'ouo'+src[0]+el,
+                            source: el,
+                            target: 'ouo'+src[0],
+                            type:ouoConceptArr
+                        }
+                    }
+                ]);
+            }
+            
+        }
+        
 
         //GENERATORE DI RUOLI E ATTRIBUTI 
         function AttrRoleGenerator( src, targt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
@@ -269,131 +376,27 @@
             container: document.getElementById('cy'),
             style: stile
         });
-            
-        //INIZIO MAIN
-            
-            //inizio creazione di archi e nodi messi a mano di concetti (sup,super,star)
+
+        //CREAZIONE NODO STAR
         cy.add([
             {
-            group:'nodes',
-            data: { id: 'Book', type: 'starConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'b', type: 'superOuo'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'E-book', type: 'superConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'AudioBook', type: 'superConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'PrintedBook', type: 'superConcept'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'Bookb',
-                source: 'b',
-                target: 'Book',
-                type:'normal'
+                group:'nodes',
+                data: { id: 'Book', type: 'starConcept'},
             }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bE-book',
-                source: 'E-book',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bAudioBook',
-                source: 'AudioBook',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'bPrintedBook',
-                source: 'PrintedBook',
-                target: 'b',
-                type:'descendant'
-            }
-            },
-            //nodi esempio-------------------------------------
-            {
-            group:'nodes',
-            data: { id: 'be', type: 'superOuo'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'Bookbe',
-                source: 'be',
-                target: 'Book',
-                type:'normal'
-            }
-            },
-            {
-            group:'nodes',
-            data: { id: 'Educational', type: 'superConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'Tutorial', type: 'superConcept'},
-            },
-            {
-            group:'nodes',
-            data: { id: 'Literature', type: 'superConcept'},
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beEducational',
-                source: 'Educational',
-                target: 'be',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beTutorial',
-                source: 'Tutorial',
-                target: 'be',
-                type:'descendant'
-            }
-            },
-            {
-            group:'edges',
-            data: {
-                id: 'beLiterature',
-                source: 'Literature',
-                target: 'be',
-                type:'descendant'
-            }
-            }
-            
         ]);
-            //fine creazione di archi e nodi messi a mano di concetti (sup,super,star)
-            
-            //inizio creazione di ruoli e attributi
+
+        //INIZIO MAIN
+            //creazione di ruoli e attributi e concetti
+        var src1 = ['PrintedBook','E-book','AudioBook'];
+        var src2 = ['Literature','Tutorial','Educational'];
+        SubSuperConceptGenerator(src1, 'normal', 'subConcept', 'subOuo', 'descendant');
+        SubSuperConceptGenerator(src2, 'normal', 'subConcept', 'subOuo', 'descendant');
+
         AttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
         AttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
-        // NodeGenerator(10);
         AttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
-            //inizio creazione di ruoli e attributi
-            
+        // NodeGenerator(10);
+           
         //FINE MAIN
         
         //INIZIO GESTIONE DEL LAYOUT
@@ -420,37 +423,13 @@
         cy.fit(cy.$id("Book"),275);
         //FINE GESTIONE LAYOUT
         
-        //INIZIO GESTIONE FAKE ATTRIBUTES
+        //INIZIO GESTIONE NODI FAKE 
+
         FakeAttrGen();
+        FakeRoleGen();
+        FakeManager();
 
-        var compAtrr = cy.$('node[type = "complexAttribute"]');
-        compAtrr.on('grabon drag',function(evt){
-            var node = evt.target;
-            var idnode = node.data('id');
-            var fakenode = cy.$id(idnode+'fake');
-            var ix = node.position('x');
-            var iy = node.position('y');
-            fakenode.position({
-                x: ix,
-                y: iy
-            });
-        });
-
-        var fakeAtrr = cy.$('node[type = "fakeAttribute"]');
-        fakeAtrr.on('grabon drag',function(evt){
-            var node = evt.target;
-            var idnode = node.data('id');
-            var l = idnode.length;
-            idnode = idnode.slice(0,l-4);
-            var realnode = cy.$id(idnode);
-            var ix = node.position('x');
-            var iy = node.position('y');
-            realnode.position({
-                x: ix,
-                y: iy
-            });
-        });
-        //FINE GESTIONE FAKE ATTRIBUTES
+        //FINE GESTIONE NODI FAKE
 
             
             
