@@ -1,6 +1,6 @@
 var stile= [        //STILE NODI
     {
-        selector: 'node[type = "ouo"]',
+        selector: 'node[type = "subOuo"],[type = "superOuo"]',
         style: {
             shape: 'hexagon',
             height: 18,
@@ -24,7 +24,7 @@ var stile= [        //STILE NODI
         }
     },
     {
-        selector:'node[type = "concept"]',
+        selector:'node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"]',
         style:{
             shape:'rectangle',
             height:30,

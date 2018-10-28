@@ -5,13 +5,14 @@
 <head>
     <meta charset="utf-8"></meta>
     <title>Conceptoscape</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.18/cytoscape.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.18/cytoscape.js"></script>
 
     <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.6.0/cola.js"></script>
     <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-qtip/2.7.0/cytoscape-qtip.js"></script>
-    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.6.0/cytoscape-cola.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/1.6.0/cytoscape-cola.js"></script> -->
 
     <script src='stile.js'></script>
+    <script src='cytoscape.js'></script>
 
 </head>
 
@@ -33,7 +34,7 @@
             for (var i = 0; i < n; i++) {
                 cy.add({
                     group:"nodes",
-                    data: { id: 'node' + i ,type: 'concept'},
+                    data: { id: 'node' + i ,type: 'subConcept'},
                     position: { x: 200*i, y:450 }
                     }
                 );
@@ -105,23 +106,23 @@
         cy.add([
             {
             group:'nodes',
-            data: { id: 'Book', type: 'concept'},
+            data: { id: 'Book', type: 'starConcept'},
             },
             {
             group:'nodes',
-            data: { id: 'b', type: 'ouo'},
+            data: { id: 'b', type: 'subOuo'},
             },
             {
             group:'nodes',
-            data: { id: 'E-book', type: 'concept'},
+            data: { id: 'E-book', type: 'subConcept'},
             },
             {
             group:'nodes',
-            data: { id: 'AudioBook', type: 'concept'},
+            data: { id: 'AudioBook', type: 'subConcept'},
             },
             {
             group:'nodes',
-            data: { id: 'PrintedBook', type: 'concept'},
+            data: { id: 'PrintedBook', type: 'subConcept'},
             },
             {
             group:'edges',
@@ -158,13 +159,66 @@
                 target: 'b',
                 type:'descendant'
             }
+            },
+            //nodi esempio-------------------------------------
+            {
+            group:'nodes',
+            data: { id: 'be', type: 'subOuo'},
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'Bookbe',
+                source: 'be',
+                target: 'Book',
+                type:'normal'
+            }
+            },
+            {
+            group:'nodes',
+            data: { id: 'Educational', type: 'subConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'Licterature', type: 'subConcept'},
+            },
+            {
+            group:'nodes',
+            data: { id: 'Tutorial', type: 'subConcept'},
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beEducational',
+                source: 'Educational',
+                target: 'be',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beLicterature',
+                source: 'Licterature',
+                target: 'be',
+                type:'descendant'
+            }
+            },
+            {
+            group:'edges',
+            data: {
+                id: 'beTutorial',
+                source: 'Tutorial',
+                target: 'be',
+                type:'descendant'
+            }
             }
             
         ]);
         
         
         // NodeGenerator(10);
-        SimpleAttrRoleGenerator(':title','Book','doublenormal','existsW','simpleAttribute');
+        SimpleAttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
         SimpleAttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
         SimpleAttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
         
@@ -179,7 +233,8 @@
         var elenco = {
             attribute: [],
             role: [],
-            attribute: []
+            subOuo: [],
+            superOuo: []
         };
 
         for (let i = 0; i < nodes.length; i++) {
@@ -235,8 +290,6 @@
 
                 elenco.role.push(n);
                 
-
-
                 nodeExists.position({
                     x: starx - 100,
                     y: stary + n 
@@ -248,13 +301,63 @@
                 })
             }
             
-            else {
+            else if(node.data('type') == "subOuo" || node.data('type') == "andornot"){
+                
+
+                var min = Math.ceil(-180);
+                var max = Math.floor(180);
+                var n = Math.floor(Math.random() * (max - min + 1)) + min;
+
+                for (let i = 0; i < elenco.subOuo.length; i++) {
+                    const element = elenco.subOuo[i];
+                    while(n<element){
+                        n = n+5;
+                    }     
+                }
+                
+                //elenco.subOuo.push(n);
+
+
+                node.position({
+                    x: starx + n,
+                    y: stary + 90 
+                });
+
+                subConcetti = node.incomers('node[type = "subConcept"]');
+                var ouox = node.position('x');
+                var ouoy = node.position('y');
+                var range = subConcetti.length * 90 //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO) 
+                var start = ouox - (range/2);
+                var stop = ouox + (range/2);
+                
+
+                for (let i = 0; i < elenco.subOuo.length; i++) {
+                    var element = elenco.subOuo[i];
+                    while( start<element ){
+                        start = start+5;
+                        stop = stop+5;
+                        
+                    }
+                }
+
+                elenco.subOuo.push(stop);
+                    
+
+                for (let i = 0; i < subConcetti.length; i++) {
+                    const nodeSubCon = subConcetti[i];
+                    nodeSubCon.position({
+                        x: ouox + start,
+                        y: ouoy + 90
+                    });
+                    start += 90;
+                    // console.log(subConcetti.eq(i).data('id')+": "
+                    //     +subConcetti.eq(i).data('type')
+                    //     +subConcetti.eq(i).position('x')+"\n-----------"  
+                    // );
+                }
 
             }
-
-
-
-            
+   
         }
 
         cy.fit(cy.$id("Book"),275);
