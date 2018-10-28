@@ -296,7 +296,7 @@
             //typeConcept--> tipo dei concetti figli (sub o super)
             //typeouo--> tipo degli (sub o super / andornot o ouo)
             //ouoStarArr--> tipo arco che va da ouo a star
-            //aonName--> node che deve apparire nel ouo solo nel caso in cui è andornot
+            //aonName--> testo che deve apparire nel ouo solo nel caso in cui è andornot
             if(typeOuo == "superAndornot" || typeOuo == "subAndornot"){
                 cy.add([
                     {group: 'nodes', data: { id: 'ouo'+src[0], type: typeOuo, andornot: aonName}},
@@ -388,9 +388,9 @@
         //INIZIO MAIN
             //creazione di ruoli e attributi e concetti
         var src1 = ['PrintedBook','E-book','AudioBook'];
-        var src2 = ['Literature','Tutorial','Educational'];
+        var src2 = ['Media'];
         SubSuperConceptGenerator(src1, 'normal', 'subConcept', 'subOuo', 'descendant');
-        SubSuperConceptGenerator(src2, 'normal', 'subConcept', 'subOuo', 'descendant');
+        SubSuperConceptGenerator(src2, 'antidescendant', 'superConcept', 'superOuo', 'antinormal');
 
         AttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
         AttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');

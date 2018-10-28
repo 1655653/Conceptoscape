@@ -1,4 +1,4 @@
-var stile= [        //STILE NODI
+var stile = [        //STILE NODI
     {
         selector: 'node[type = "subOuo"],[type = "superOuo"]',
         style: {
@@ -12,11 +12,11 @@ var stile= [        //STILE NODI
         selector: 'node[type = "superAndornot"],[type = "subAndornot"]',
         style: {
             shape: 'hexagon',
-            label: 'data(andornot)',
             height: 18,
             'background-color': 'white',
             'border-width':0.5,
             'border-color':'black',
+            label: 'data(andornot)',
             'text-valign' : 'center',
             'text-halign' : 'center',
             'font-size' : 10
@@ -172,6 +172,16 @@ var stile= [        //STILE NODI
             'target-arrow-shape': 'triangle'
         }
     },
+    {           //STILE ARCHI
+        selector:'edge[type = "antinormal"]',
+        style:{
+            'width': 1,
+            'curve-style': 'bezier',
+            'line-color' : 'black',
+            'source-arrow-color': 'black',
+            'source-arrow-shape': 'triangle'
+        }
+    },
     {
         selector:'edge[type = "doublenormal"]',
         style:{
@@ -182,6 +192,20 @@ var stile= [        //STILE NODI
             'target-arrow-shape': 'triangle',
             'source-arrow-color': 'black',
             'source-arrow-shape': 'triangle'
+        }
+    },
+    {
+        selector:'edge[type = "antidescendant"]',
+        style:{
+            'width': 1,
+            'curve-style': 'bezier',
+            'line-color' : 'grey',
+            'line-style' : 'dashed',
+            'source-arrow-shape': 'diamond',
+            'source-arrow-color': 'black',
+            'source-arrow-fill': 'hollow',
+            'arrow-scale': 1.2
+            
         }
     },
     {
