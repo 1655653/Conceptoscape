@@ -30,27 +30,28 @@
     <div id="cy"></div>
     <script>
         //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL
-        function Grapholy( node ){
+        function Grapholy( nodes ){
+            var attributes = cy.$('node[type = "simpleAttribute"],[type = "complexAttribute"]');
+            var roles = cy.$('node[type = "simpleRole"],[type = "doubleComplexRole"]');
+            var subouos = cy.$('node[type = "subOuo"],[type = "subAndornot"]');
+            var superconcepts = cy.$('node[type = "superConcept"]');
+            
+
+
             var star = cy.$id('Book');
             var starx = star.position('x');
             var stary = star.position('y');
+            var n;
 
-            if(node.data('type') == "simpleAttribute" || node.data('type') == "complexAttribute"){
+            for (let i = 0; i < attributes.length; i++){
+                const node = attributes[i];
                 nodeAttrid = node.data('id');
                 var nodeExists = cy.$id('exists'+nodeAttrid+'Book');
-                var min = Math.ceil(-35);
-                var max = Math.floor(35);
-                var n = Math.floor(Math.random() * (max - min + 1)) + min;
-
-                for (let i = 0; i < elenco.attribute.length; i++) {
-                    const element = elenco.attribute[i];
-                    while(Math.abs(n-element) < 12){
-                        n = n+15;
-                    }     
-                }
-
-                elenco.attribute.push(n);
                 
+                if ( i == 0) n = 0;
+                else if( i % 2 != 0 ) n = -Math.abs(n)-30;
+                else if( i % 2 == 0 ) n = n * (-1);
+
                 nodeExists.position({
                     x: starx + 100,
                     y: stary + n 
@@ -60,24 +61,17 @@
                     x:nodeExists.position('x')+50,
                     y:nodeExists.position('y')
                 })
+                
             }
-            
-            else if(node.data('type') == "simpleRole" || node.data('type') == "complexRole" || node.data('type') == "doubleComplexRole" ){
+            for (let i = 0; i < roles.length; i++) {
+                const node = roles[i];
                 nodeRoleid = node.data('id');
                 var nodeExists = cy.$id('exists'+nodeRoleid+'Book');
-                var min = Math.ceil(-35);
-                var max = Math.floor(35);
-                var n = Math.floor(Math.random() * (max - min + 1)) + min;
 
-                for (let i = 0; i < elenco.role.length; i++) {
-                    const element = elenco.role[i];
-                    while(Math.abs(n-element) < 16){
-                        n = n+15;
-                    }     
-                }
+                if ( i == 0) n = 0;
+                else if( i % 2 != 0 ) n = -Math.abs(n)-40;
+                else if( i % 2 == 0 ) n = n * (-1);
 
-                elenco.role.push(n);
-                
                 nodeExists.position({
                     x: starx - 100,
                     y: stary + n 
@@ -87,116 +81,96 @@
                     x:nodeExists.position('x')-80,
                     y:nodeExists.position('y')
                 })
+
+                
             }
             
-            else if(node.data('type') == "subOuo" || node.data('type') == "subAndornot"){
+            //inizio gestione figli
+            var ranges = {
+                dx: [],
+                sx: [],
+                n : []//strutt.dati per le coordinate
+            };
+            for (let i = 0; i < subouos.length; i++) {
+                const nodeouo = subouos[i];
+                var subConcetti = nodeouo.incomers('node[type = "subConcept"]');
+                var numSubConc = subConcetti.length;
                 
-
-                var min = Math.ceil(-180);
-                var max = Math.floor(180);
-                var n = Math.floor(Math.random() * (max - min + 1)) + min;
-
-
-                node.position('y',stary + 90);
-
-                if(elenco.subOuo.length == 0){ ///primo nodo ouo
-                    node.position('x',starx + n);
+                var range = (numSubConc * 70) + 20*(numSubConc+1) //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO+1) 
+                
+                if(numSubConc % 2 == 0){
+                    ranges.dx.push(range/2);
+                    ranges.sx.push(range/2);
                 }
-
-                for (let i = 0; i < elenco.subOuo.length; i++) {
-                    const element = elenco.subOuo[i];
-                    while(n<element){
-                        n = n+5;
-                    }     
-                    node.position('x',n);
+                else{
+                    ranges.dx.push(range*(3/5));
+                    ranges.sx.push((range*(2/5)));
+                }
+                ranges.n.push(i);
+            }
+            for (let i = 0; i < subouos.length; i++) {
+                nodeouo = subouos[i];
+                subConcetti = nodeouo.incomers('node[type = "subConcept"]');
+                numSubConc = subConcetti.length;
+                
+                nodeouo.position('y',stary + 90);
+                if(i == 0){
+                    n = starx;
+                }
+                else if(i  == 1){
+                    n = starx - ranges.sx[0] - ranges.dx[i];
+                }
+                else if(i == 2){
+                    n = starx + ranges.dx[0] + ranges.sx[2];
+                }
+                else if (i % 2 == 0){
+                    n = ranges.n[i-2] + ranges.dx[i-2] + ranges.sx[i];
+                }
+                else if (i % 2 != 0){
+                    n = ranges.n[i-2] - ranges.sx[i-2] - ranges.dx[i];
                 }
                 
+                nodeouo.position('x',n);
 
-
-                var subConcetti = node.incomers('node[type = "subConcept"]');
-                var ouox = node.position('x');
-                var ouoy = node.position('y');
-                var range = subConcetti.length * 90 //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO) 
-                var start = ouox - (range/2);
-                var stop = ouox + (range/2);
-
-                
-
-                for (let i = 0; i < elenco.subOuo.length; i++) {
-                    var element = elenco.subOuo[i];
-                    while( start<element ){
-                        start = start+5;
-                        stop = stop+5;
-                    }
-                }
-
-                elenco.subOuo.push(stop);
+                for (let j = 0; j < subConcetti.length; j++) {
+                    const nodeSubCon = subConcetti[j];
                     
-                for (let i = 0; i < subConcetti.length; i++) {
-                    const nodeSubCon = subConcetti[i];
+                    if ( j == 0) start = 0;
+                    else if( j % 2 != 0 ) start = -Math.abs(start)-90;
+                    else if( j % 2 == 0 ) start = start * (-1) ;
+
+                    var ouoy = nodeouo.position('y');
+
                     nodeSubCon.position({
-                        x: start,
+                        x: start + n,
                         y: ouoy + 90
                     });
-                    start += 90;
+                    
                     
                 }
 
+
+
+
+
+                
+
+            }
+            //fine gestione figli
+
+            for (let i = 0; i < superconcepts.length; i++) {
+                const node = superconcepts[i];
+                node.position('y',stary-90);
+
+                if(i == 0) n = 0;
+                else if( i % 2 != 0 ) n = -Math.abs(n)-80;
+                else if( i % 2 == 0 ) n = n * (-1);
+
+                node.position('x',starx + n);
+                
             }
             
-            else if(node.data('type') == "superOuo" || node.data('type') == "superAndornot"){
-                var min = Math.ceil(-180);
-                var max = Math.floor(180);
-                var n = Math.floor(Math.random() * (max - min + 1)) + min;
-
-
-                node.position('y',stary - 90);
-
-                if(elenco.superOuo.length == 0){ ///primo nodo ouo
-                    node.position('x',starx + n);
-                }
-
-                for (let i = 0; i < elenco.superOuo.length; i++) {
-                    const element = elenco.superOuo[i];
-                    while(n<element){
-                        n = n+5;
-                    }     
-                    node.position('x',n);
-                }
-                
-
-
-                var superConcetti = node.incomers('node[type = "superConcept"]');
-                var ouox = node.position('x');
-                var ouoy = node.position('y');
-                var range = superConcetti.length * 90 //70*NUM NODI (LUNGH)+ 20*NUM NODI(SPAZIO) 
-                var start = ouox - (range/2);
-                var stop = ouox + (range/2);
-
-                
-
-                for (let i = 0; i < elenco.superOuo.length; i++) {
-                    var element = elenco.superOuo[i];
-                    while( start<element ){
-                        start = start+5;
-                        stop = stop+5;
-                    }
-                }
-
-                elenco.superOuo.push(stop);
-                    
-                
-                for (let i = 0; i < superConcetti.length; i++) {
-                    const nodeSupCon = superConcetti[i];
-                    nodeSupCon.position({
-                        x: start,
-                        y: ouoy - 90
-                    });
-                    start += 90;
-                    
-                }
-
-            }
+            
         }
 
         //GESTORE DEI NODI FAKE, LAYOUT
@@ -290,14 +264,14 @@
 
         }
         
-        //GENERATORE DI SUPER E SUB CONCETTI
-        function SubSuperConceptGenerator(src, ouoStarArr, typeConcept, typeOuo, ouoConceptArr, aonName){ //src è una str dati
+        //GENERATORE DI SUB CONCETTI
+        function SubConceptGenerator(src, ouoStarArr, typeConcept, typeOuo, ouoConceptArr, aonName){ //src è una str dati
             //ouoStarArr--> tipo arco che va da ouo a star
             //typeConcept--> tipo dei concetti figli (sub o super)
             //typeouo--> tipo degli (sub o super / andornot o ouo)
             //ouoStarArr--> tipo arco che va da ouo a star
             //aonName--> testo che deve apparire nel ouo solo nel caso in cui è andornot
-            if(typeOuo == "superAndornot" || typeOuo == "subAndornot"){
+            if(typeOuo == "subAndornot"){
                 cy.add([
                     {group: 'nodes', data: { id: 'ouo'+src[0], type: typeOuo, andornot: aonName}},
                     {
@@ -344,27 +318,47 @@
             
         }
         
+        //GENERATORE DI SUPER CONCETTI
+        function SuperConceptGenerator(srcID,arrstyle){
+            for (let i = 0; i < srcID.length; i++) {
+                const element = srcID[i];
+                cy.add([
+                {group: 'nodes', data: { id: element, type: 'superConcept'}},
+                    {
+                    group: 'edges', 
+                        data:{
+                            id: 'Book'+element,
+                            source: 'Book',
+                            target: element,
+                            type:arrstyle
+                        }
+                    }
+
+                ]);
+            }
+            
+        }
 
         //GENERATORE DI RUOLI E ATTRIBUTI 
-        function AttrRoleGenerator( src, targt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
+        function AttrRoleGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
             cy.add([
-                { group:"nodes",data: { id: src, type: typ }}, //creo nodo giusto
-                { group:"nodes",data: { id: 'exists'+src+targt, type: colorExists }}, //creo nodo exists
+                { group:"nodes",data: { id: idSrc, type: typ }}, //creo nodo giusto
+                { group:"nodes",data: { id: 'exists' +idSrc+idTargt, type: colorExists }}, //creo nodo exists
 
                 {   
                     group:"edges",
                     data: { // creo edge nodo--->exists
-                    id: 'edgeExists'+src+targt, 
-                    source: src,
-                    target: 'exists'+src+targt,
+                    id: 'edgeExists' +idSrc+idTargt, 
+                    source: idSrc,
+                    target: 'exists' +idSrc+idTargt,
                     type: 'descendant' } 
                 },
                 { 
                     group:"edges",                    
                     data: { //creo edge exists--->target
-                    id: 'edgetarget'+src+targt, 
-                    source: 'exists'+src+targt,
-                    target: targt,
+                    id: 'edgetarget' +idSrc+idTargt, 
+                    source: 'exists' +idSrc+idTargt,
+                    target: idTargt,
                     type: arrstyle } 
                 }
 
@@ -389,12 +383,14 @@
             //creazione di ruoli e attributi e concetti
         var src1 = ['PrintedBook','E-book','AudioBook'];
         var src2 = ['Media'];
-        SubSuperConceptGenerator(src1, 'normal', 'subConcept', 'subOuo', 'descendant');
-        SubSuperConceptGenerator(src2, 'antidescendant', 'superConcept', 'superOuo', 'antinormal');
+       
+        SubConceptGenerator(src1, 'normal', 'subConcept', 'subOuo', 'descendant','and');
+        SuperConceptGenerator(src2,'normal');
 
         AttrRoleGenerator(':title','Book','doublenormal','existsW','complexAttribute');
         AttrRoleGenerator(':genre','Book','doublenormal','existsW','complexAttribute');
         AttrRoleGenerator(':writtenBy','Book','doublenormal','existsW','simpleRole');
+        
         // NodeGenerator(10);
            
         //FINE MAIN
@@ -415,12 +411,10 @@
             superOuo: []
         };
 
-        for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i];
-            Grapholy( node);
-        }
+        Grapholy(nodes);
+        
 
-        cy.fit(cy.$id("Book"),275);
+        cy.fit(cy.$id("Book"),280);
         //FINE GESTIONE LAYOUT
         
         //INIZIO GESTIONE NODI FAKE 
