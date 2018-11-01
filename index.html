@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+    </head>
+    <body>
+
+    <div id="demo">
+        
+    </div>
+
+    <script>
+        function readTextFile(file, callback) {
+            var rawFile = new XMLHttpRequest();
+            rawFile.overrideMimeType("application/json");
+            rawFile.open("GET", file, true);
+            rawFile.onreadystatechange = function() {
+                if (rawFile.readyState === 4 && rawFile.status == "200") {
+                    callback(rawFile.responseText);
+                }
+            }
+            rawFile.send(null);
+        }
+        
+
+        //usage:
+        readTextFile("book.json", function(text){
+            var data = JSON.parse(text);
+            for (el in data.Concepts){
+                var obj = data.Concepts[el];
+                for(id in obj){
+                    // console.log(id); //es audiobook
+                    if (id == 'Book'){
+                        var star = obj[id];
+
+                        var maStarAttributes = [];
+                        var opStarAttributes = [];
+
+
+                        if( star.Mandatory_Attributes != undefined){
+                            for(h in star.Mandatory_Attributes ){
+                                maStarAttributes.push(star.Mandatory_Attributes[h]);
+                            }
+                        }
+                        if( star.Optional_Attributes != undefined){
+                            for(h in star.Optional_Attributes ){
+                                opStarAttributes.push(star.Optional_Attributes[h]);
+                            }
+                        }
+                        // console.log(starAttributes); //array con scritti gli id degli attributi
+                    }
+                }
+            }
+            for (let j = 0; j < maStarAttributes.length; j++) { //per tutti gli attributi di star 
+                const singleAttr = maStarAttributes[j]; //è una stringa
+                var dom = false;
+                var funct = false;
+                for(x in data.Attributes){
+                    var element = data.Attributes[x];
+                    if(element[singleAttr] != undefined){
+                        var obj = element[singleAttr];
+                        for(y in obj){
+                            if(y == "Domain"){
+                                for(i in obj[y]){
+                                    if(obj[y][i] == 'Book'){
+                                        dom = true;
+                                        //obj[y][i] e quindi singleAttr (genre) è un attributo mandatorio e con dominio book
+                                    }
+                                }
+                                
+                            }
+                            if (y == "ObjectProperty"){
+                                funct = true;
+                                //singleAttr è un attributo mandatorio e funzionale
+                                
+                            }
+                        }
+                        if(dom == true){
+                            if(funct == true){
+                                //AttrRoleGenerator(singleAttr,'Book','doublenormal','existsW','complexAttribute');
+                            }
+                            else{
+                                //AttrRoleGenerator(singleAttr,'Book','doublenormal','existsW','simpleAttribute');
+                            }
+                        }
+                        else{
+                            if(funct == true){
+                                //AttrRoleGenerator(singleAttr,'Book','normal','existsW','complexAttribute');
+                            }
+                            else{
+                                //AttrRoleGenerator(singleAttr,'Book','normal','existsW','simpleAttribute');
+                            }
+                        }
+                    }
+                }
+            } 
+
+                
+            
+        });
+
+
+
+
+    </script>
+
+</body>
+</html>
