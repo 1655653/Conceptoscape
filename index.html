@@ -397,7 +397,7 @@
             ]);
         }
         
-        //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL
+        //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL 
         function GrapholyRole( nodes ){
             var concepts = cy.$('node[type = "simpleConcept"]');
             var subroles = cy.$('node[hint = "sub"]');
@@ -496,6 +496,7 @@
 
         }
         
+        //GENERATORE DI CONCETTI PER STARROLE
         function ConceptGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
             cy.add([
                 { group:"nodes",data: { id: idSrc, type: typ }}, //creo nodo giusto
@@ -520,7 +521,6 @@
 
             ]);
         }
-        
 
         //GENERATORE DI RUOLI PER STARROLE
         function RoleGenerator(note,srcID,typeRole,ouoStarArr,typeOuo,roleOuoArr,aonName){
@@ -603,14 +603,7 @@
             style: stile
         });
 
-        //CREAZIONE NODO STAR
-        cy.add([
-            {
-                group:'nodes',
-                data: { id: 'Book', type: 'starConcept'},
-            }
-        ]);
-
+        
 
 
         
@@ -634,14 +627,34 @@
             for (el in data.Concepts){
                 var obj = data.Concepts[el];
                 for(id in obj){
-                    // console.log(id); //es audiobook
                     if (id == 'Book'){
-                        var star = obj[id];
+                        //CREAZIONE NODO STAR
+                        cy.add([
+                            {
+                                group:'nodes',
+                                data: { id: 'Book', type: 'starConcept'},
+                            }
+                        ]);
 
+                        var star = obj[id];
+                        
+                        var subconcepts = [];
+                        var superconcepts = [];
+                        //array con scritti gli id degli attributi
                         var maStarAttributes = [];
                         var opStarAttributes = [];
 
-
+                        if( star.Sub_Disjointed_Concepts != undefined){
+                            for(h in star.Sub_Disjointed_Concepts ){
+                                subconcepts.push(star.Sub_Disjointed_Concepts[h]);
+                            }
+                        }
+                        if( star.Super_Concepts != undefined){
+                            for(h in star.Super_Concepts ){
+                                superconcepts.push(star.Super_Concepts[h]);
+                            }
+                            console.log(superconcepts);
+                        }
                         if( star.Mandatory_Attributes != undefined){
                             for(h in star.Mandatory_Attributes ){
                                 maStarAttributes.push(star.Mandatory_Attributes[h]);
@@ -652,12 +665,12 @@
                                 opStarAttributes.push(star.Optional_Attributes[h]);
                             }
                         }
-                        // console.log(starAttributes); //array con scritti gli id degli attributi
                     }
                 }
             }
-
-            for (let j = 0; j < opStarAttributes.length; j++) { //per tutti gli attributi di star 
+            
+            //INIZIO CREAZIONE NODI ATTRIBUTI OPZIONALI
+            for (let j = 0; j < opStarAttributes.length; j++) { //per tutti gli attributi opzionali di star 
                 const singleAttr = opStarAttributes[j]; //è una stringa
                 var funct = false;
                 for(x in data.Attributes){
@@ -680,8 +693,10 @@
                     }
                 }
             };
+            //FINE CREAZIONE NODI ATTRIBUTI OPZIONALI
 
-            for (let j = 0; j < maStarAttributes.length; j++) { //per tutti gli attributi di star 
+            //INIZIO CREAZIONE NODI ATTRIBUTI MANDATORI
+            for (let j = 0; j < maStarAttributes.length; j++) { //per tutti gli attributi mandatori di star 
                 const singleAttr = maStarAttributes[j]; //è una stringa
                 var dom = false;
                 var funct = false;
@@ -694,19 +709,19 @@
                                 for(i in obj[y]){
                                     if(obj[y][i] == 'Book'){
                                         dom = true;
-                                        //obj[y][i] e quindi singleAttr (genre) è un attributo  con dominio book
+                                        //obj[y][i] e quindi singleAttr (genre) è un attributo mandatorio con dominio book
                                     }
                                 }
                                 
                             }
                             if (y == "ObjectProperty"){
                                 funct = true;
-                                //singleAttr è un attributo  funzionale
+                                //singleAttr è un attributo mandatorio funzionale
                                 
                             }
                             if (y == "SomeValueMandatory"){
                                 funct = true;
-                                //singleAttr è un attributo  funzionale
+                                //singleAttr è un attributo mandatorio funzionale
                                 
                             }
                         }
@@ -729,10 +744,32 @@
                     }
                 }
             };
+            //FINE CREAZIONE NODI ATTRIBUTI MANDATORI
+
+            //INIZIO CREAZIONE NODI SOTTOCONCETTI
+            for (let j = 0; j < subconcepts.length; j++) { //per tutti gruppi di sottoconcetti di star 
+                const subgroup = subconcepts[j]; //è una stringa
+                if(subgroup.length == 1) SubConceptGenerator(subgroup, 'normal','simpleSubConcept');
+                else {
+                    SubConceptGenerator(subgroup, 'normal', 'subConcept', 'subOuo', 'descendant');
+                }
+            };
+            //FINE CREAZIONE NODI SOTTOCONCETTI*/
+
+            //INIZIO CREAZIONE NODI SUPERCONCETTI
+            for (let j = 0; j < superconcepts.length; j++) { //per tutti gruppi di superconcetti di star 
+                const sup = superconcepts[j]; //è una stringa
+                SuperConceptGenerator(sup, 'normal');
+            };
+            //FINE CREAZIONE NODI SUPERCONCETTI*/
+
+
         });
 
         //*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-**-*-*-*-*-*-*-*
         
+        
+
         //INIZIO GESTIONE DEL LAYOUT
         
         cy.layout({
@@ -742,7 +779,7 @@
         var nodes = cy.nodes('node');
         GrapholyConcept(nodes);
 
-        cy.fit(cy.$id("Book"),280);
+        cy.fit(cy.$id('Book'),280);
         //FINE GESTIONE LAYOUT
         
         //INIZIO GESTIONE NODI FAKE 

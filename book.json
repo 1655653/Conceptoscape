@@ -10,19 +10,25 @@
     "Concepts":[
         {"AudioBook":{"Super_Concepts":["Book"]}},
         {"Author":{"Mandatory_Attributes":["name"]}},
-        {"Book":{"Mandatory_Attributes":["genre"],"Optional_Attributes":["title"],"Mandatory_Roles":["writtenBy"],
-            "Sub_Concepts":["AudioBook","E_Book","PrintedBook"]}
+        {"Book":{
+            "Mandatory_Attributes":["genre"],
+            "Optional_Attributes":["title"],
+            "Mandatory_Roles":["writtenBy"],
+            "Super_Concepts":[["Edition"]],
+            "Sub_Disjointed_Concepts":[["AudioBook","E_Book","PrintedBook"]]}
         },
         {"E_Book":{"Super_Concepts":["Book"]}},
         {"EconomicEdition":{"Super_Concepts":["Edition"]}},
-        {"Edition":{"Mandatory_Attributes":["dateOfPublication","editionNumber"],
+        {"Edition":{
+            "Mandatory_Attributes":["dateOfPublication","editionNumber"],
             "Mandatory_Roles":["editedBy"],
-            "Sub_Concepts":["SpecialEdition","EconomicEdition"]}},
+            "Sub_Disjointed_Concepts":[["SpecialEdition","EconomicEdition"]]}
+        },
         {"Editor":{"Mandatory_Attributes":["name"]}},
-        {"EmergingWriter":{"Super_Concepts":["Author"]}},
-        {"PrintedBook":{"Super_Concepts":["Book"]}},
-        {"SpecialEdition":{"Super_Concepts":["Edition"]}},
-        {"UneditedBook":{"Super_Concepts":["Book"]}}
+        {"EmergingWriter":{"Super_Concepts":[["Author"]]}},
+        {"PrintedBook":{"Super_Concepts":[["Book"]]}},
+        {"SpecialEdition":{"Super_Concepts":[["Edition"]]}},
+        {"UneditedBook":{"Super_Concepts":[["Book"]]}}
         
     ],
     "Roles":[
