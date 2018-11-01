@@ -10,7 +10,7 @@
     "Concepts":[
         {"AudioBook":{"Super_Concepts":["Book"]}},
         {"Author":{"Mandatory_Attributes":["name"]}},
-        {"Book":{"Mandatory_Attributes":["genre","title"],"Mandatory_Roles":["writtenBy"],
+        {"Book":{"Mandatory_Attributes":["genre"],"Optional_Attributes":["title"],"Mandatory_Roles":["writtenBy"],
             "Sub_Concepts":["AudioBook","E_Book","PrintedBook"]}
         },
         {"E_Book":{"Super_Concepts":["Book"]}},
@@ -34,7 +34,7 @@
         {"dateOfPublication":{"Domain":["Edition"],"ObjectProperty":"Functional"}},
         {"editionNumber":{"Domain":["Edition"],"ObjectProperty":"Functional"}},
         {"genre":{"Domain":["Book"],"ObjectProperty":"Functional"}},
-        {"title":{"Domain":["Book"]}},
+        {"title":{"Domain":["Book"],"ObjectProperty":"Functional"}},
         {"name":{"ObjectProperty":"Functional"}}
     ],
     "Disjoint_Classes":[
