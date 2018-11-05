@@ -27,52 +27,10 @@
 </style>
 
 <body>
-    <!-- /+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+ -->
-    <!-- <p>Seleziona dalla lista.</p>
-    <script>
-        var soggetto;
-        
-        function readTextFile(file, callback) {
-            var rawFile = new XMLHttpRequest();
-            rawFile.overrideMimeType("application/json");
-            rawFile.open("GET", file, false);
-            rawFile.onreadystatechange = function() {
-                if (rawFile.readyState === 4 && rawFile.status == "200") {
-                    callback(rawFile.responseText);
-                }
-            }
-            rawFile.send(null);
-        }
-                
-        
-        var listaconcetti = [];     
-        readTextFile("book.json", function(text){
-            var data = JSON.parse(text);
-            for (el in data.Concepts){
-                var obj = data.Concepts[el];
-                for(id in obj){
-                    listaconcetti.push(id);
-                }
-            }
-        });
-
-        document.write("<select onchange = Soggetto(this.value)>");
-        for(i=0; i<listaconcetti.length; i++) {
-            document.write("<option value=" + listaconcetti[i] + ">" + listaconcetti[i] + "</option>");
-        }
-        document.write("</select>");
-
-        function Soggetto(name){
-            soggetto = name;
-        }
-        
-    </script>
-    /+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+ -->
     <div id="cy">
     </div>
     <script>
-        var soggetto = 'Book';
-        var tipo = 'starConcept';
+       
 
         //CREAZIONE DELL ELEMENTO CY 
         var cy = cytoscape({
@@ -92,6 +50,9 @@
             }
             rawFile.send(null);
         }
+        
+        var soggetto = 'Book';
+        var tipo = 'starConcept';
         
         //INIZIO PARSING DEL JSON
         function jparse(text){
