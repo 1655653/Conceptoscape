@@ -24,7 +24,7 @@ var stile = [        //STILE NODI
         }
     },
     {
-        selector:'node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"]',
+        selector:'node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"],[type = "simpleSubConcept"],[type = "simpleConcept"]',
         style:{
             shape:'rectangle',
             height:30,
@@ -56,8 +56,8 @@ var stile = [        //STILE NODI
     {
         selector:'node[type = "fakeRole"]',
         style:{
-            height:30,
-            width: 70,
+            height:25,
+            width: 45,
             shape:"polygon",
             'background-color' : 'black',
             'shape-polygon-points': '0 -1, 1 0, 0 1, 0 0.8, 0.8 0, 0 -0.8'
@@ -67,19 +67,19 @@ var stile = [        //STILE NODI
         selector:'node[type = "simpleFakeRole"]',
         style:{
             shape:'diamond',
-            height:25,
-            width: 60,
+            height:19,
+            width: 35,
             'background-color': 'white',
             'border-width':1,
             'border-color':'black',
         }
     },
     {
-        selector:'node[type = "simpleRole"],[type = "doubleComplexRole"]',
+        selector:'node[type = "simpleRole"],[type = "doubleSimpleRole"],[type = "doubleComplexRole"]',
         style:{
             shape:'diamond',
-            height:30,
-            width: 70,
+            height:25,
+            width: 45,
             'background-color': 'white',
             'border-width':1,
             'border-color':'black',
@@ -90,11 +90,26 @@ var stile = [        //STILE NODI
         }
     },
     {
-        selector:'node[type = "complexRole"]',
+        selector:'node[type = "starRole"]',
         style:{
             shape:'diamond',
-            height:30,
-            width: 70,
+            height:25,
+            width: 45,
+            'background-color': 'white',
+            'border-width':1,
+            'border-color':'black',
+            label: 'data(id)',
+            'text-valign' : 'center',
+            'text-halign' : 'right',
+            'font-size' : 10
+        }
+    },
+    {
+        selector:'node[type = "complexRole"],[type = "subComplexRole"]',
+        style:{
+            shape:'diamond',
+            height:25,
+            width: 45,
             'background-color': 'white',
             'border-width':4,
             'border-color':'black',
