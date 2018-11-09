@@ -5,358 +5,129 @@
 <head>
     <meta charset="utf-8"></meta>
     <title>Conceptoscape</title>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.18/cytoscape.js"></script>
-    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-qtip/2.7.0/cytoscape-qtip.js"></script>
---->
-    <script src='stile.js'></script>
-    <script src='cytoscape.js'></script>
-    <script src='cytotools.js'></script>
 
+    <script language="JavaScript" type="text/javascript" src='stile.js'></script>
+    <script language="JavaScript" type="text/javascript" src='jquery-1.8.3.js'></script>
+    <script language="JavaScript" type="text/javascript" src='cytoscape.js'></script>
+    <script language="JavaScript" type="text/javascript" src='cytotools.js'></script>
+    <link rel="stylesheet" type="text/css" href="cyss.css"/>
 </head>
 
-<style>
-    #cy {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-    }
-</style>
-
 <body>
+    <div id='cc'>
+        <em>Choose the type</em>
+        <select name = "conorrol">
+            <option>---</option>
+        </select>
+        <em> and the entity</em>
+        <select name = "lista">
+            <option>---</option>
+        </select>
+        
+        <button onclick= "go()">Draw</button>
+
+        <!-- <button class="btn btn-inside btn-boarder"><img src="https://i.cloudup.com/gBzAn-oW_S-2000x2000.png" width="64px" height="64px" id="plane"></button>
+        <div class="bg"><img src="https://i.cloudup.com/2ZAX3hVsBE-3000x3000.png" id="bg" width="32px" height="32px" style="opacity:0;"></div>
+        <div class="around around-boarder" onclick="go(); ani(); anitwo();"></div> -->
+    </div>
     
+    
+    <div id = 'cyo'></div>
+
     <script>
-        document.write("<div id='cy'></div>");
-
-        //CREAZIONE DELL ELEMENTO CY 
-        var cy = cytoscape({
-            container: document.getElementById('cy'),
-            style: stile
-        });
         
-        //INIZIO PARSING DEL JSON
-        
-        var soggetto = 'Book';
-        var tipo = 'starConcept';
-
-        function jparse(text){
+        //INIZIO INTERAZIONE
+        var listaconcetti = [];
+        var listaruoli = [];
+        readTextFile("book.json", function(text){
             var data = JSON.parse(text);
             for (el in data.Concepts){
                 var obj = data.Concepts[el];
                 for(id in obj){
-                    if (id == soggetto){
-                        //CREAZIONE NODO STAR
-                        cy.add([
-                            {
-                                group:'nodes',
-                                data: { id: soggetto, type: tipo},
-                            }
-                        ]);
-
-                        var star = obj[id];
-                        
-                        var subconcepts = [];
-                        var superconcepts = [];
-                        //array con scritti gli id degli attributi
-                        var maStarAttributes = [];
-                        var opStarAttributes = [];
-
-                        var maStarRole = [];
-                        var opStarRole = [];
-
-                        if( star.Sub_Concepts != undefined){
-                            for(h in star.Sub_Concepts ){
-                                subconcepts.push(star.Sub_Concepts[h]);
-                            }
-                        }
-                        if( star.Super_Concepts != undefined){
-                            superconcepts.push(star.Super_Concepts);
-                        }
-                        if( star.Mandatory_Attributes != undefined){
-                            for(h in star.Mandatory_Attributes ){
-                                maStarAttributes.push(star.Mandatory_Attributes[h]);
-                            }
-                        }
-                        if( star.Optional_Attributes != undefined){
-                            for(h in star.Optional_Attributes ){
-                                opStarAttributes.push(star.Optional_Attributes[h]);
-                            }
-                        }
-                        if( star.Mandatory_Roles != undefined){
-                            for(h in star.Mandatory_Roles ){
-                                maStarRole.push(star.Mandatory_Roles[h]);
-                            }
-                        }
-                        if( star.Optional_Roles != undefined){
-                            for(h in star.Optional_Roles ){
-                                opStarRole.push(star.Optional_Roles[h]);
-                            }
-                        }
-                    }
+                    listaconcetti.push(id);
                 }
             }
-            
-            //INIZIO CREAZIONE NODI ATTRIBUTI OPZIONALI
-            for (let j = 0; j < opStarAttributes.length; j++) { //per tutti gli attributi opzionali di star 
-                const singleAttr = opStarAttributes[j]; //è una stringa
-                var funct = false;
-                for(x in data.Attributes){
-                    var element = data.Attributes[x];
-                    if(element[singleAttr] != undefined){
-                        var obj = element[singleAttr];
-                        for(y in obj){
-                            if (y == "ObjectProperty"){
-                                funct = true;
-                                //singleAttr è un attributo  funzionale
-                            }
-                        }
-                        if(funct == true){
-                            AttrRoleGenerator(singleAttr,soggetto,'normal','existsW','complexAttribute');
-                        }
-                        else{
-                            AttrRoleGenerator(singleAttr,soggetto,'normal','existsW','simpleAttribute');
-                        }
-                    
-                    }
-                }
-            };
-            //FINE CREAZIONE NODI ATTRIBUTI OPZIONALI
-
-            //INIZIO CREAZIONE NODI ATTRIBUTI MANDATORI
-            for (let j = 0; j < maStarAttributes.length; j++) { //per tutti gli attributi mandatori di star 
-                const singleAttr = maStarAttributes[j]; //è una stringa
-                var dom = false;
-                var funct = false;
-                for(x in data.Attributes){
-                    var element = data.Attributes[x];
-                    if(element[singleAttr] != undefined){
-                        var obj = element[singleAttr];
-                        for(y in obj){
-                            if(y == "Domain"){
-                                for(i in obj[y]){
-                                    if(obj[y][i] == soggetto){
-                                        dom = true;
-                                        //obj[y][i] e quindi singleAttr (genre) è un attributo mandatorio con dominio book
-                                    }
-                                }
-                                
-                            }
-                            if (y == "ObjectProperty"){
-                                funct = true;
-                                //singleAttr è un attributo mandatorio funzionale
-                                
-                            }
-                            if (y == "SomeValueMandatory"){
-                                funct = true;
-                                //singleAttr è un attributo mandatorio funzionale
-                                
-                            }
-                        }
-                        if(dom == true){
-                            if(funct == true){
-                                AttrRoleGenerator(singleAttr,soggetto,'doublenormal','existsW','complexAttribute');
-                            }
-                            else{
-                                AttrRoleGenerator(singleAttr,soggetto,'doublenormal','existsW','simpleAttribute');
-                            }
-                        }
-                        else{
-                            if(funct == true){
-                                AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','complexAttribute');
-                            }
-                            else{
-                                AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','simpleAttribute');
-                            }
-                        }
-                    }
-                }
-            };
-            //FINE CREAZIONE NODI ATTRIBUTI MANDATORI
-
-            //INIZIO CREAZIONE NODI SOTTOCONCETTI
-            for (let j = 0; j < subconcepts.length; j++) { //per tutti gruppi di sottoconcetti di star 
-                const subgroup = subconcepts[j]; //è una stringa
-                if(subgroup.length == 1) SubConceptGenerator(subgroup, 'normal','simpleSubConcept');
-                else {
-                    SubConceptGenerator(subgroup, 'normal', 'subConcept', 'subOuo', 'descendant');
-                }
-            };
-            //FINE CREAZIONE NODI SOTTOCONCETTI*/
-
-            //INIZIO CREAZIONE NODI SUPERCONCETTI
-            for (let j = 0; j < superconcepts.length; j++) { //per tutti gruppi di superconcetti di star 
-                const sup = superconcepts[j]; //è una stringa
-                SuperConceptGenerator(sup, 'normal');
-            };
-            //FINE CREAZIONE NODI SUPERCONCETTI*/
-
-            //INIZIO CREAZIONE NODI RUOLI MANDATORI
-            for (let j = 0; j < maStarRole.length; j++) { //per tutti i ruoli mandatori di star 
-                const singleRol = maStarRole[j]; //è una stringa
-                var dom = false;
-                var rang = false;
-                var funct = false;
-                var invFunct = false;
-                for(x in data.Roles){
-                    var element = data.Roles[x];
-                    if(element[singleRol] != undefined){
-                        var obj = element[singleRol];
-                        for(y in obj){
-                            if(y == "Domain"){
-                                for(i in obj[y]){
-                                    if(obj[y][i] == soggetto){
-                                        dom = true;
-                                        //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con dominio book
-                                        //existsW
-                                    }
-                                }
-                                
-                            }
-                            if (y == "ObjectProperty"){
-                                for(g in obj[y] ){
-                                    if(obj[y][g] == "InverseFunctional") invFunct = true;
-                                    if(obj[y][g] == "Functional") funct = true;
-                                }
-                                
-                            }
-                            if(y == "Range"){
-                                for(i in obj[y]){
-                                    if(obj[y][i] == soggetto){
-                                        rang = true;
-                                        //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con range book
-                                        //existsB
-                                    }
-                                }
-                                
-                            }
-                        }
-                        var ex;
-                        var arr = 'normal';
-                        var complexity;
-                        if(dom == true){
-                            ex = 'existsW';
-                            arr = 'doublenormal'
-                        }
-                        if(rang == true){
-                            ex = 'existsB';
-                        }
-
-                        if(funct == true && invFunct == true) complexity = 'doubleComplexRole';
-                        else if(funct == true && invFunct == false) complexity = 'doubleSimpleRole';
-                        else if(funct == false && invFunct == true) complexity = 'complexRole';
-                        else complexity = 'simpleRole';
-
-                        AttrRoleGenerator(singleRol,soggetto,arr,ex,complexity);
-                        
-                    }
-                }
-            };
-            //FINE CREAZIONE NODI RUOLI MANDATORI
-            
-            //INIZIO CREAZIONE NODI RUOLI OPZIONALI
-            for (let j = 0; j < opStarRole.length; j++) { //per tutti i ruoli mandatori di star 
-                const singleRol = opStarRole[j]; //è una stringa
-                var dom = false;
-                var rang = false;
-                var funct = false;
-                var invFunct = false;
-                for(x in data.Roles){
-                    var element = data.Roles[x];
-                    if(element[singleRol] != undefined){
-                        var obj = element[singleRol];
-                        for(y in obj){
-                            if(y == "Domain"){
-                                for(i in obj[y]){
-                                    if(obj[y][i] == soggetto){
-                                        dom = true;
-                                        //obj[y][i] e quindi singleRol (writtenby) è un ruolo opzionale con dominio book
-                                        //existsW
-                                    }
-                                }
-                                
-                            }
-                            if (y == "ObjectProperty"){
-                                for(g in obj[y] ){
-                                    if(obj[y][g] == "InverseFunctional") invFunct = true;
-                                    if(obj[y][g] == "Functional") funct = true;
-                                }
-                                
-                            }
-                            if(y == "Range"){
-                                for(i in obj[y]){
-                                    if(obj[y][i] == soggetto){
-                                        rang = true;
-                                        //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con range book
-                                        //existsB
-                                    }
-                                }
-                                
-                            }
-                        }
-                        var ex;
-                        var arr = 'normal';
-                        var complexity;
-                        if(dom == true){
-                            ex = 'existsW';
-                        }
-                        if(rang == true){
-                            ex = 'existsB';
-                        }
-
-                        if(funct == true && invFunct == true) complexity = 'doubleComplexRole';
-                        else if(funct == true && invFunct == false) complexity = 'doubleSimpleRole';
-                        else if(funct == false && invFunct == true) complexity = 'complexRole';
-                        else complexity = 'simpleRole';
-
-                        AttrRoleGenerator(singleRol,soggetto,arr,ex,complexity);
-                        
-                    }
+            for (el in data.Roles){
+                var obj = data.Roles[el];
+                for(id in obj){
+                    listaruoli.push(id);
                 }
             }
-            //FINE CREAZIONE NODI RUOLI OPZIONALI
+        });
+
+        var tipo;
+        var soggetto;
+        $.each(["Concept","Role"],function(index,elem){
+            $('select[name = "conorrol"]').append(new Option(elem,index));
+        });
+        
+        $('select[name = "conorrol"]').live("change",function(){
+            if($('select[name = "conorrol"] option:selected').text() == "Role") {
+                tipo = "starRole";
+                $('select[name = "lista"]').empty();
+                $('select[name = "lista"]').append(new Option("---",0));
+                $.each(listaruoli,function(index,elem){
+                    $('select[name = "lista"]').append(new Option(elem,index));
+                });
+            }
+            if($('select[name = "conorrol"] option:selected').text() == "Concept") {
+                tipo = "starConcept";
+                $('select[name = "lista"]').empty();
+                $('select[name = "lista"]').append(new Option("---",0));
+                $.each(listaconcetti,function(index,elem){
+                    $('select[name = "lista"]').append(new Option(elem,index));
+                });
+            }
+        })
+
+        $('select[name = "lista"]').live("change",function(){
+            var x = $('select[name = "lista"] option:selected').text();
+            if(x != "---") soggetto = x;
+        })
+
+
+        //CREAZIONE DELL ELEMENTO CY 
+        var cy;
+        function go(){
+            cy = cytoscape({
+                container: document.getElementById('cyo'),
+                style: stile
+            });
+        
+            
+            
+            //INIZIO PARSING DEL JSON
+            
+            readTextFile("book.json", jparse);
+
+            //FINE PARSING DEL JSON
+            
+            //INIZIO GESTIONE DEL LAYOUT
+            
+            cy.layout({
+                name:'preset',
+
+            }).run(); 
+
+            var nodes = cy.nodes('node');
+
+            if(tipo == 'starConcept') GrapholyConcept(nodes);
+            else GrapholyRole(nodes);
+
+            cy.fit(cy.$id(soggetto),300);
+            //FINE GESTIONE LAYOUT
+            
+            //INIZIO GESTIONE NODI FAKE 
+
+            FakeAttrGen();
+            FakeRoleGen();
+            FakeManager();
+            fixSizeLabel()
+            
+
+            //FINE GESTIONE NODI FAKE
         }
-            
-        readTextFile("book.json", jparse);
-        //FINE PARSING DEL JSON
         
-        //INIZIO GESTIONE DEL LAYOUT
-        
-        cy.layout({
-            name:'preset',
-
-        }).run(); 
-        var nodes = cy.nodes('node');
-        
-        if(tipo == 'starConcept') GrapholyConcept(nodes);
-        else GrapholyRole(nodes);
-
-        cy.fit(cy.$id(soggetto),280);
-        //FINE GESTIONE LAYOUT
-        
-        //INIZIO GESTIONE NODI FAKE 
-
-        FakeAttrGen();
-        FakeRoleGen();
-        FakeManager();
-
-        //FINE GESTIONE NODI FAKE
-    
-
-        //readTextFile serve per leggere il json
-        function readTextFile(file, callback) {
-            var rawFile = new XMLHttpRequest();
-            rawFile.overrideMimeType("application/json");
-            rawFile.open("GET", file, false);
-            rawFile.onreadystatechange = function() {
-                if (rawFile.readyState === 4 && rawFile.status == "200") {
-                    callback(rawFile.responseText);
-                }
-            }
-            rawFile.send(null);
-        }
-            
-
     </script>
     
 </body>

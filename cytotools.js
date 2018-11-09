@@ -464,7 +464,7 @@ function GrapholyRole( nodes ){
 }
 
 //GENERATORE DI CONCETTI PER STARROLE
-function ConceptGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea nodo concetto + exists + archi
+function ConceptGenerator( idSrc, idTargt, arrNodoExi, colorExists,typ, arrExitgt){ //crea nodo concetto + exists + archi
     cy.add([
         { group:"nodes",data: { id: idSrc, type: typ }}, //creo nodo giusto
         { group:"nodes",data: { id: 'exists' +idSrc+idTargt, type: colorExists }}, //creo nodo exists
@@ -475,7 +475,7 @@ function ConceptGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea no
             id: 'edgeExists' +idSrc+idTargt, 
             source: idSrc,
             target: 'exists' +idSrc+idTargt,
-            type: 'antinormal' } 
+            type: arrNodoExi } 
         },
         { 
             group:"edges",                    
@@ -483,7 +483,7 @@ function ConceptGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea no
             id: 'edgetarget' +idSrc+idTargt, 
             source: 'exists' +idSrc+idTargt,
             target: idTargt,
-            type: arrstyle } 
+            type: arrExitgt } 
         }
 
     ]);
@@ -563,3 +563,471 @@ function RoleGenerator(note,srcID,typeRole,ouoStarArr,typeOuo,roleOuoArr,aonName
         ]);
     }
 }
+
+//PARSING DEL FILE JSON E CREAZIONE DEI NODI
+function jparse(text){
+    var data = JSON.parse(text);
+    //ho starConcept
+    if(tipo == 'starConcept'){
+        for (el in data.Concepts){
+            var obj = data.Concepts[el];
+            for(id in obj){
+                if (id == soggetto){
+                    //CREAZIONE NODO STAR
+                    cy.add([
+                        {
+                            group:'nodes',
+                            data: { id: soggetto, type: tipo},
+                        }
+                    ]);
+
+                    var star = obj[id];
+                    //array con scritti gli id degli elementi
+                    var subconcepts = [];
+                    var superconcepts = [];
+                    
+                    var maStarAttributes = [];
+                    var opStarAttributes = [];
+
+                    var maStarRole = [];
+                    var opStarRole = [];
+
+                    if( star.Sub_Concepts != undefined){
+                        for(h in star.Sub_Concepts ){
+                            subconcepts.push(star.Sub_Concepts[h]);
+                        }
+                    }
+                    if( star.Super_Concepts != undefined){
+                        superconcepts.push(star.Super_Concepts);
+                    }
+                    if( star.Mandatory_Attributes != undefined){
+                        for(h in star.Mandatory_Attributes ){
+                            maStarAttributes.push(star.Mandatory_Attributes[h]);
+                        }
+                    }
+                    if( star.Optional_Attributes != undefined){
+                        for(h in star.Optional_Attributes ){
+                            opStarAttributes.push(star.Optional_Attributes[h]);
+                        }
+                    }
+                    if( star.Mandatory_Roles != undefined){
+                        for(h in star.Mandatory_Roles ){
+                            maStarRole.push(star.Mandatory_Roles[h]);
+                        }
+                    }
+                    if( star.Optional_Roles != undefined){
+                        for(h in star.Optional_Roles ){
+                            opStarRole.push(star.Optional_Roles[h]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        //INIZIO CREAZIONE NODI ATTRIBUTI OPZIONALI
+        for (let j = 0; j < opStarAttributes.length; j++) { //per tutti gli attributi opzionali di star 
+            const singleAttr = opStarAttributes[j]; //è una stringa
+            var funct = false;
+            for(x in data.Attributes){
+                var element = data.Attributes[x];
+                if(element[singleAttr] != undefined){
+                    var obj = element[singleAttr];
+                    for(y in obj){
+                        if (y == "ObjectProperty"){
+                            funct = true;
+                            //singleAttr è un attributo  funzionale
+                        }
+                    }
+                    if(funct == true){
+                        AttrRoleGenerator(singleAttr,soggetto,'normal','existsW','complexAttribute');
+                    }
+                    else{
+                        AttrRoleGenerator(singleAttr,soggetto,'normal','existsW','simpleAttribute');
+                    }
+                
+                }
+            }
+        };
+        //FINE CREAZIONE NODI ATTRIBUTI OPZIONALI
+
+        //INIZIO CREAZIONE NODI ATTRIBUTI MANDATORI
+        for (let j = 0; j < maStarAttributes.length; j++) { //per tutti gli attributi mandatori di star 
+            const singleAttr = maStarAttributes[j]; //è una stringa
+            var dom = false;
+            var funct = false;
+            for(x in data.Attributes){
+                var element = data.Attributes[x];
+                if(element[singleAttr] != undefined){
+                    var obj = element[singleAttr];
+                    for(y in obj){
+                        if(y == "Domain"){
+                            for(i in obj[y]){
+                                if(obj[y][i] == soggetto){
+                                    dom = true;
+                                    //obj[y][i] e quindi singleAttr (genre) è un attributo mandatorio con dominio book
+                                }
+                            }
+                            
+                        }
+                        if (y == "ObjectProperty"){
+                            funct = true;
+                            //singleAttr è un attributo mandatorio funzionale
+                            
+                        }
+                        if (y == "SomeValueMandatory"){
+                            funct = true;
+                            //singleAttr è un attributo mandatorio funzionale
+                            
+                        }
+                    }
+                    if(dom == true){
+                        if(funct == true){
+                            AttrRoleGenerator(singleAttr,soggetto,'doublenormal','existsW','complexAttribute');
+                        }
+                        else{
+                            AttrRoleGenerator(singleAttr,soggetto,'doublenormal','existsW','simpleAttribute');
+                        }
+                    }
+                    else{
+                        if(funct == true){
+                            AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','complexAttribute');
+                        }
+                        else{
+                            AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','simpleAttribute');
+                        }
+                    }
+                }
+            }
+        };
+        //FINE CREAZIONE NODI ATTRIBUTI MANDATORI
+
+        //INIZIO CREAZIONE NODI SOTTOCONCETTI
+        for (let j = 0; j < subconcepts.length; j++) { //per tutti gruppi di sottoconcetti di star 
+            const subgroup = subconcepts[j]; //è una stringa
+            if(subgroup.length == 1) SubConceptGenerator(subgroup, 'normal','simpleSubConcept');
+            else {
+                SubConceptGenerator(subgroup, 'normal', 'subConcept', 'subOuo', 'descendant');
+            }
+        };
+        //FINE CREAZIONE NODI SOTTOCONCETTI*/
+
+        //INIZIO CREAZIONE NODI SUPERCONCETTI
+        for (let j = 0; j < superconcepts.length; j++) { //per tutti gruppi di superconcetti di star 
+            const sup = superconcepts[j]; //è una stringa
+            SuperConceptGenerator(sup, 'normal');
+        };
+        //FINE CREAZIONE NODI SUPERCONCETTI*/
+
+        //INIZIO CREAZIONE NODI RUOLI MANDATORI
+        for (let j = 0; j < maStarRole.length; j++) { //per tutti i ruoli mandatori di star 
+            const singleRol = maStarRole[j]; //è una stringa
+            var dom = false;
+            var rang = false;
+            var funct = false;
+            var invFunct = false;
+            for(x in data.Roles){
+                var element = data.Roles[x];
+                if(element[singleRol] != undefined){
+                    var obj = element[singleRol];
+                    for(y in obj){
+                        if(y == "Domain"){
+                            for(i in obj[y]){
+                                if(obj[y][i] == soggetto){
+                                    dom = true;
+                                    //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con dominio book
+                                    //existsW
+                                }
+                            }
+                            
+                        }
+                        if (y == "ObjectProperty"){
+                            for(g in obj[y] ){
+                                if(obj[y][g] == "InverseFunctional") invFunct = true;
+                                if(obj[y][g] == "Functional") funct = true;
+                            }
+                            
+                        }
+                        if(y == "Range"){
+                            for(i in obj[y]){
+                                if(obj[y][i] == soggetto){
+                                    rang = true;
+                                    //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con range book
+                                    //existsB
+                                }
+                            }
+                            
+                        }
+                    }
+                    var ex;
+                    var arr = 'normal';
+                    var complexity;
+                    if(dom == true){
+                        ex = 'existsW';
+                        arr = 'doublenormal'
+                    }
+                    if(rang == true){
+                        ex = 'existsB';
+                    }
+
+                    if(funct == true && invFunct == true) complexity = 'doubleComplexRole';
+                    else if(funct == true && invFunct == false) complexity = 'doubleSimpleRole';
+                    else if(funct == false && invFunct == true) complexity = 'complexRole';
+                    else complexity = 'simpleRole';
+
+                    AttrRoleGenerator(singleRol,soggetto,arr,ex,complexity);
+                    
+                }
+            }
+        };
+        //FINE CREAZIONE NODI RUOLI MANDATORI
+        
+        //INIZIO CREAZIONE NODI RUOLI OPZIONALI
+        for (let j = 0; j < opStarRole.length; j++) { //per tutti i ruoli mandatori di star 
+            const singleRol = opStarRole[j]; //è una stringa
+            var dom = false;
+            var rang = false;
+            var funct = false;
+            var invFunct = false;
+            for(x in data.Roles){
+                var element = data.Roles[x];
+                if(element[singleRol] != undefined){
+                    var obj = element[singleRol];
+                    for(y in obj){
+                        if(y == "Domain"){
+                            for(i in obj[y]){
+                                if(obj[y][i] == soggetto){
+                                    dom = true;
+                                    //obj[y][i] e quindi singleRol (writtenby) è un ruolo opzionale con dominio book
+                                    //existsW
+                                }
+                            }
+                            
+                        }
+                        if (y == "ObjectProperty"){
+                            for(g in obj[y] ){
+                                if(obj[y][g] == "InverseFunctional") invFunct = true;
+                                if(obj[y][g] == "Functional") funct = true;
+                            }
+                            
+                        }
+                        if(y == "Range"){
+                            for(i in obj[y]){
+                                if(obj[y][i] == soggetto){
+                                    rang = true;
+                                    //obj[y][i] e quindi singleRol (writtenby) è un ruolo mandatorio con range book
+                                    //existsB
+                                }
+                            }
+                            
+                        }
+                    }
+                    var ex;
+                    var arr = 'normal';
+                    var complexity;
+                    if(dom == true){
+                        ex = 'existsW';
+                    }
+                    if(rang == true){
+                        ex = 'existsB';
+                    }
+
+                    if(funct == true && invFunct == true) complexity = 'doubleComplexRole';
+                    else if(funct == true && invFunct == false) complexity = 'doubleSimpleRole';
+                    else if(funct == false && invFunct == true) complexity = 'complexRole';
+                    else complexity = 'simpleRole';
+
+                    AttrRoleGenerator(singleRol,soggetto,arr,ex,complexity);
+                    
+                }
+            }
+        }
+        //FINE CREAZIONE NODI RUOLI OPZIONALI
+        
+    }
+    //*****************************
+    //ho starRole
+    else{
+        for (el in data.Roles){
+            var obj = data.Roles[el];
+            for(id in obj){
+                if (id == soggetto){
+                    var star = obj[id];
+
+                    //VEDO LA FUNZIONALITÀ DELLA STAR
+                    var funct = false;
+                    var complex = false;
+                    var tippo;
+                    if(star.ObjectProperty != undefined){
+                        for(x in star.ObjectProperty){
+                            var el = star.ObjectProperty[x];
+                            if(el == "Functional") funct = true;
+                            if(el == "InverseFunctional") complex = true;
+                        }
+                        if(!funct && complex) tippo = "complexRole";
+                        if(funct && !complex) tippo = "doubleSimpleRole";
+                        if(funct && complex) tippo = "doubleComplexRole";
+                    }
+                    else tippo = "simpleRole"
+                    //CREAZIONE NODO STAR
+                    cy.add([
+                        {
+                            group:'nodes',
+                            data: { id: soggetto, type: tippo},
+                        }
+                    ]);
+                    
+                    //INIZIO CREAZIONE NODI DOMINIO
+                    var mand = false;
+                    if(star.Domain != undefined){
+                        for(x in star.Domain){
+                            var domConcept = star.Domain[x];
+                            for(y in data.Concepts){
+                                var manCpt = data.Concepts[y];
+                                for(z in manCpt){
+                                    if(z == domConcept){
+                                        var manRol = manCpt[z].Mandatory_Roles;
+                                        for (let i = 0; i < manRol.length; i++) {
+                                            if (manRol[i] == soggetto)
+                                            mand = true;
+                                        }
+                                    }
+                                }
+                            }
+                            if(mand == true){
+                                ConceptGenerator( domConcept, soggetto, "doublenormal", 'existsW','simpleConcept',"antidescendant")
+                            }
+                            else {
+                                ConceptGenerator( domConcept, soggetto, "antinormal", 'existsW','simpleConcept',"antidescendant")
+                            }
+                        }
+                    }
+                    //FINE CREAZIONE NODI DOMINIO
+
+                    //INIZIO CREAZIONE NODI RANGE
+                    var mand = false;
+                    if(star.Range != undefined){
+                        for(x in star.Range){
+                            var ranConcept = star.Range[x];
+                            for(y in data.Concepts){
+                                var manCpt = data.Concepts[y];
+                                for(z in manCpt){
+                                    if(z == ranConcept){
+                                        var manRol = manCpt[z].Mandatory_Roles;
+                                        if(manRol != undefined){
+                                            for (let i = 0; i < manRol.length; i++) {
+                                                if (manRol[i] == soggetto)
+                                                mand = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if(mand == true){
+                                
+                                ConceptGenerator( ranConcept, soggetto, "doublenormal", 'existsB','simpleConcept',"antidescendant")
+                            }
+                            else {
+                                ConceptGenerator( ranConcept, soggetto, 'antinormal', 'existsB','simpleConcept','antidescendant')
+                            }
+                        }
+                    }
+                    //FINE CREAZIONE NODI RANGE
+
+                    //INIZIO CREZIONE NODI SOTTORUOLO
+                    if(star.Sub_Roles != undefined){
+                        for(g in star.Sub_Roles){
+                            var singlesubrol = star.Sub_Roles[g];
+                            var funct = false;
+                            var invFunct = false;
+                            for(x in data.Roles){
+                                var element = data.Roles[x];
+                                for(y in element){
+                                    if(y == singlesubrol){
+                                        var el = element[y];
+                                        for(z in el.ObjectProperty){
+                                            if(el.ObjectProperty[z]=="Functional") funct = true;
+                                            if(el.ObjectProperty[z]=="InverseFunctional") invFunct = true;
+                                        }
+
+                                    }
+                                    
+                                }
+
+                            }
+                            var tippo;
+                            if(!funct && invFunct) tippo = "complexRole";
+                            if(!funct && !invFunct) tippo = "simpleRole";
+                            if(funct && !invFunct) tippo = "doubleSimpleRole";
+                            if(funct && invFunct) tippo = "doubleComplexRole";
+                            RoleGenerator('sub',star.Sub_Roles,tippo,"normal");
+                            funct = false;
+                            invFunct = false;
+                        }
+                    }
+                    //FINE CREAZIONE NODI SOTTORUOLO
+
+                    //INZIO CREAZIONE NODI SUPERRUOLO
+                    if(star.Super_Roles != undefined){
+                        for(g in star.Super_Roles){
+                            var singlesuprol = star.Super_Roles[g];
+                            var funct = false;
+                            var invFunct = false;
+                            for(x in data.Roles){
+                                var element = data.Roles[x];
+                                for(y in element){
+                                    if(y == singlesuprol){
+                                        var el = element[y];
+                                        for(z in el.ObjectProperty){
+                                            if(el.ObjectProperty[z]=="Functional") funct = true;
+                                            if(el.ObjectProperty[z]=="InverseFunctional") invFunct = true;
+                                        }
+
+                                    }
+                                    
+                                }
+
+                            }
+                            var tippo;
+                            if(!funct && invFunct) tippo = "complexRole";
+                            if(!funct && !invFunct) tippo = "simpleRole";
+                            if(funct && !invFunct) tippo = "doubleSimpleRole";
+                            if(funct && invFunct) tippo = "doubleComplexRole";
+                            RoleGenerator('super',star.Super_Roles,tippo,"antinormal");
+                            funct = false;
+                            invFunct = false;
+                        }
+                    }
+                    //FINE CREAZIONE NODI SUPERRUOLO
+                }
+            }
+        }
+    }
+}
+
+//sistema le label troppo grandi
+function fixSizeLabel(){
+    var conc = cy.$('node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"],[type = "simpleSubConcept"],[type = "simpleConcept"]');
+    for (let i = 0; i < conc.length; i++) {
+        const element = conc[i];
+        var lab = element.style('label');
+        if(lab.length>11){
+            element.style('font-size',7);
+        }
+        
+    }
+}
+
+//readTextFile serve per leggere il json
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
+
