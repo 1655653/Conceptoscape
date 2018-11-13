@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -130,7 +131,7 @@ import uk.ac.manchester.cs.owlapi.modularity.SyntacticLocalityModuleExtractor;
 public class EmptyJson {
     public static void main(String args[]) throws OWLOntologyCreationException, IOException {
         //INIZIALIZZAZIONE
-        String path = "C:\\Users\\theta\\Desktop\\books_ontology.owl";
+        String path = "C:\\Users\\theta\\Desktop\\super-heroes.owl";
         OWLOntologyManager manager =OWLManager.createOWLOntologyManager();
         File file = new File (path);
         OWLOntology o = manager.loadOntologyFromOntologyDocument(file);
@@ -179,8 +180,11 @@ public class EmptyJson {
         List<String> listanomiConcetti = new LinkedList<String>();
         List<OWLClass> listanomiOWLConcetti = new LinkedList<OWLClass>();
         for (OWLClass cls : o.getClassesInSignature()){
-            listanomiConcetti.add(cls.getIRI().getFragment());
-            listanomiOWLConcetti.add(cls);
+            if(!cls.getIRI().getFragment().equals("Thing")){
+                listanomiConcetti.add(cls.getIRI().getFragment());
+                listanomiOWLConcetti.add(cls);
+            }
+            
         }
         //FINE RIEMPIO LISTA CON STRINGE DI TUTTI I CONCETTI  
         
@@ -273,14 +277,45 @@ public class EmptyJson {
             
             if(!SuperConclist.isEmpty())infoOggettoConcetto.put("Super_Concepts", SuperConclist);
             //FINE LETTURA DI EVENTUALI SUPERCONCETTI
-            /*************/
+           
+            //INIZIO LETTURA DI EVENTUALI SUBCONCETTI
             List<LinkedList<String>> SubConclist = new LinkedList<LinkedList<String>>();//è un array di array
             
-            
-            
-            
+            Set<OWLClass> setsubcla = r.getSubClasses(concettocorrente).getFlattened();
+            OWLDataFactory df = o.getOWLOntologyManager().getOWLDataFactory();
+            System.out.println(nomeConcetto);
+            for(OWLClass subcla : setsubcla){
+                Set<OWLDisjointClassesAxiom> dj = o.getDisjointClassesAxioms(subcla);
+                for(OWLDisjointClassesAxiom sc : dj ){
+                    Set<OWLClass> singlc = sc.getClassesInSignature();
+                    LinkedList<String> singlConcList = new LinkedList();
+                    for(OWLClass k : singlc ){
+                        String K = k.getIRI().getFragment();
+                        if(!singlConcList.contains(K)){
+                            singlConcList.add(K);
+                        }
+                    }
+                    if(!SubConclist.contains(singlConcList)) SubConclist.add(singlConcList);
+                }
+            }
+            for(OWLClass subcla : setsubcla){
+                LinkedList<String> scl = new LinkedList();
+                String clas = subcla.getIRI().getFragment();
+                boolean cista = false;
+                for(LinkedList l : SubConclist ){
+                    if(l.contains(clas)) cista = true;
+                }
+                if(!cista && !clas.equals("Nothing")) {
+                    scl.add(clas);
+                    SubConclist.add(scl);
+                }
+                
+                
+            }
+            System.out.println("");
+            //FINE LETTURA DI EVENTUALI SUBCONCETTI
             if(!SubConclist.isEmpty())infoOggettoConcetto.put("Sub_Concepts", SubConclist);
-            /*************/
+            
             oggettoConcetto.put(nomeConcetto, infoOggettoConcetto);
             arrayconcetti.add(oggettoConcetto);
         }
