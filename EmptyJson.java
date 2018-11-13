@@ -318,12 +318,27 @@ public class EmptyJson {
             
             if(attributifunzionali.contains(nomeAttributo)) infoOggettoAttributo.put("ObjectProperty", "Functional");
             
-//            if(nomeAttributo == "title"){ //per ogni ruolo preso dal owl
-//                List<String> MandInlist = new LinkedList<String>();
-//                MandInlist.add("Book");
-//                if(!MandInlist.isEmpty())infoOggettoAttributo.put("Mandatory_in", MandInlist);
-//            }
-            
+            List<String> MandInlist = new LinkedList<String>();
+            for (OWLClass cls : o.getClassesInSignature()){
+                Set<OWLSubClassOfAxiom> set = o.getSubClassAxiomsForSubClass(cls);
+                for(OWLSubClassOfAxiom subcl : set){
+                    OWLClassExpression nomeattribEXPR = subcl.getSuperClass();
+                    if(nomeattribEXPR.getClassExpressionType().toString().equals("DataSomeValuesFrom")){
+                        OWLClassExpression nomeconcettoEXPR = subcl.getSubClass();
+                        String nomeconcetto = nomeconcettoEXPR.asOWLClass().getIRI().getFragment();
+                        Set<OWLEntity> entities = nomeattribEXPR.getSignature();
+                        for(OWLEntity entity : entities){
+                            if(entity.getEntityType().getName().equals("DataProperty")){
+                                String attributo = entity.getIRI().getFragment();
+                                if(attributo.equals(nomeAttributo)){
+                                    MandInlist.add(nomeconcetto);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if(!MandInlist.isEmpty())infoOggettoAttributo.put("Mandatory_in", MandInlist);
             oggettoAttributo.put(nomeAttributo, infoOggettoAttributo);
             arrayattributi.add(oggettoAttributo);
         }
