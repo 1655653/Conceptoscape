@@ -131,7 +131,7 @@ import uk.ac.manchester.cs.owlapi.modularity.SyntacticLocalityModuleExtractor;
 public class EmptyJson {
     public static void main(String args[]) throws OWLOntologyCreationException, IOException {
         //INIZIALIZZAZIONE
-        String path = "C:\\Users\\theta\\Desktop\\super-heroes.owl";
+        String path = "C:\\Users\\theta\\Desktop\\books.owl";
         OWLOntologyManager manager =OWLManager.createOWLOntologyManager();
         File file = new File (path);
         OWLOntology o = manager.loadOntologyFromOntologyDocument(file);
