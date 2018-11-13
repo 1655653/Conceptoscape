@@ -43,6 +43,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataExactCardinality;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -74,6 +75,7 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
@@ -127,6 +129,7 @@ import uk.ac.manchester.cs.owlapi.modularity.SyntacticLocalityModuleExtractor;
  */
 public class EmptyJson {
     public static void main(String args[]) throws OWLOntologyCreationException, IOException {
+        //INIZIALIZZAZIONE
         String path = "C:\\Users\\theta\\Desktop\\books_ontology.owl";
         OWLOntologyManager manager =OWLManager.createOWLOntologyManager();
         File file = new File (path);
@@ -135,19 +138,25 @@ public class EmptyJson {
         
         JSONObject obj = new JSONObject();
         
+        //INIZIO ELABORAZIONE DATI PER I CONCETTI
         JSONArray arrayconcetti = new JSONArray();
         LavoraConcetti(arrayconcetti,o);
         obj.put("Concepts", arrayconcetti);
-        
+        //FINE ELABORAZIONE DATI PER I CONCETTI
+
+        //INIZIO ELABORAZIONE DATI PER I RUOLI
         JSONArray arrayruoli = new JSONArray();
         LavoraRuoli(arrayruoli,o);
         obj.put("Roles", arrayruoli);
+        //FINE ELABORAZIONE DATI PER I RUOLI
         
+        //INIZIO ELABORAZIONE DATI PER GLI ATTRIBUTI
         JSONArray arrayattributi = new JSONArray();
         LavoraAttributi(arrayattributi,o);
         obj.put("Attributes", arrayattributi);
+        //FINE ELABORAZIONE DATI PER GLI ATTRIBUTI
         
-        
+        //SCRITTURA DEL RISULTATO SU 2 FILE, UNO NELLA CARTELLA DEL PROGETTO ED UNO SU DEKSTOP.
         try (FileWriter localfile = new FileWriter("/Users/theta/Desktop/prova.json")) {
             localfile.write(obj.toJSONString());
             System.out.println("Successfully Copied JSON Object to File...");
@@ -159,52 +168,119 @@ public class EmptyJson {
             System.out.println("\nJSON Object: " + obj);
         }
    }
-    //INIZIO LAVORA CONCETTI
+    
+
+
+//INIZIO LAVORA CONCETTI
     private static void LavoraConcetti(JSONArray arrayconcetti,OWLOntology o) {
-               
+        OWLReasonerFactory rf = new org.semanticweb.HermiT.ReasonerFactory();
+        OWLReasoner r = rf.createReasoner(o);
+        //INIZIO RIEMPIO LISTA CON STRINGE DI TUTTI I CONCETTI       
         List<String> listanomiConcetti = new LinkedList<String>();
+        List<OWLClass> listanomiOWLConcetti = new LinkedList<OWLClass>();
         for (OWLClass cls : o.getClassesInSignature()){
             listanomiConcetti.add(cls.getIRI().getFragment());
+            listanomiOWLConcetti.add(cls);
         }
-
+        //FINE RIEMPIO LISTA CON STRINGE DI TUTTI I CONCETTI  
+        
+        //PER OGNI CONCETTO CREO LA STRUTTURA DATI CHE DIFFERISCE PER OGNUNO
         for (int i = 0; i < listanomiConcetti.size(); i++) {
             JSONObject oggettoConcetto = new JSONObject();
             JSONObject infoOggettoConcetto = new JSONObject();
             String nomeConcetto = listanomiConcetti.get(i);
             
-//            if(nomeConcetto == "Book"){ //per ogni concetto preso dal owl
-//                List<String> MandAttrlist= new LinkedList<String>(); //lista dei mandAttr del nomeconcetto fatta dal owl 
-//                List<String> MandRolelist = new LinkedList<String>();//ecc
-//                List<String> OptRolelist = new LinkedList<String>();
-//                List<String> SuperConclist = new LinkedList<String>();
-//                
-//                
-//                List<LinkedList<String>> SubConclist = new LinkedList<LinkedList<String>>();//è un array di array
-//                
-//                    /*da sistemare con owlapi*/
-//                    LinkedList<String> SingleGroupSubConc = new LinkedList<String>();
-//                    LinkedList<String> SingleGroupSubConc2 = new LinkedList<String>();
-//                    SingleGroupSubConc.add("AudioBook");
-//                    SingleGroupSubConc.add("E_Book");
-//                    SingleGroupSubConc.add("PrintedBook");
-//                    SingleGroupSubConc2.add("UneditedBook");
-//                    SubConclist.add(SingleGroupSubConc);
-//                    SubConclist.add(SingleGroupSubConc2);
-//                
-//                 
-//                
-//                MandAttrlist.add("genre");
-//                MandAttrlist.add("title");
-//                OptRolelist.add("writtenBy");
-//                if(!MandAttrlist.isEmpty())infoOggettoConcetto.put("Mandatory_Attributes", MandAttrlist);
-//                if(!MandRolelist.isEmpty())infoOggettoConcetto.put("Mandatory_Roles", MandRolelist);
-//                if(!OptRolelist.isEmpty())infoOggettoConcetto.put("Optional_Roles", OptRolelist);
-//                if(!SubConclist.isEmpty())infoOggettoConcetto.put("Sub_Concepts", SubConclist);
-//                if(!SuperConclist.isEmpty())infoOggettoConcetto.put("Super_Concepts", SuperConclist);
-//               
-//                
-//            }
+            //INZIO LETTURA DI EVENTUALI ATTRIBUTI MANDATORY
+            List<String> MandAttrlist= new LinkedList<String>(); 
+            for (OWLClass cls : o.getClassesInSignature()){
+                Set<OWLSubClassOfAxiom> set = o.getSubClassAxiomsForSubClass(cls);
+                for(OWLSubClassOfAxiom subcl : set){
+                    OWLClassExpression nomeattribEXPR = subcl.getSuperClass();
+                    if(nomeattribEXPR.getClassExpressionType().toString().equals("DataSomeValuesFrom")){
+                        OWLClassExpression nomeconcettoEXPR = subcl.getSubClass();
+                        String nomeconcetto = nomeconcettoEXPR.asOWLClass().getIRI().getFragment();
+                        if(nomeconcetto.equals(nomeConcetto)){
+                            Set<OWLEntity> entities = nomeattribEXPR.getSignature();
+                            for(OWLEntity entity : entities){
+                                if(entity.getEntityType().getName().equals("DataProperty")){
+                                    String attributo = entity.getIRI().getFragment();
+                                    MandAttrlist.add(attributo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if(!MandAttrlist.isEmpty())infoOggettoConcetto.put("Mandatory_Attributes", MandAttrlist);
+            //FINE LETTURA DI EVENTUALI ATTRIBUTI MANDATORY
             
+            //INIZIO LETTURA DI EVENTUALI RUOLI MANDATORY
+            List<String> MandRolelist = new LinkedList<String>();
+            
+            OWLClass concettocorrente = listanomiOWLConcetti.get(i);
+            Set<OWLSubClassOfAxiom> set = o.getSubClassAxiomsForSubClass(concettocorrente);
+            Set<OWLClassAxiom> axiom = o.getAxioms(concettocorrente);
+            for(OWLClassAxiom ax : axiom){
+                if(ax.getAxiomType().equals(AxiomType.EQUIVALENT_CLASSES)){
+                    for(OWLDataProperty prop : ax.getDataPropertiesInSignature()){
+                        if(MandAttrlist.contains(prop.getIRI().getFragment())){
+                            MandAttrlist.add(prop.getIRI().getFragment());
+                        }
+                    }
+                }
+            }
+            for(OWLSubClassOfAxiom subcl : set){
+                OWLClassExpression nomeruoloEXPR = subcl.getSuperClass();
+                if(nomeruoloEXPR.getClassExpressionType().toString().equals("ObjectSomeValuesFrom")){ 
+                    Set<OWLEntity> setnomeruolo = nomeruoloEXPR.getSignature();
+                    for(OWLEntity nomeruolo : setnomeruolo){
+                        String rol = nomeruolo.getIRI().getFragment();
+                        if(!rol.equals("Thing")&& !MandRolelist.contains(rol)) MandRolelist.add(rol);
+                    }
+                }
+            }
+            if(!MandRolelist.isEmpty())infoOggettoConcetto.put("Mandatory_Roles", MandRolelist);
+            //FINE LETTURA DI EVENTUALI RUOLI MANDATORY
+            
+            //INIZIO LETTURA DI EVENTUALI RUOLI OPZIONALI
+            List<String> OptRolelist = new LinkedList<String>();
+            
+            for (OWLObjectProperty ruol : o.getObjectPropertiesInSignature()){
+                Set<OWLClass> setorgy = r.getObjectPropertyDomains(ruol).getFlattened();
+                Set<OWLClass> setRange = r.getObjectPropertyRanges(ruol).getFlattened();
+                setorgy.addAll(setRange);
+                for(OWLClass c : setorgy){
+                    String C = c.getIRI().getFragment();
+                    if(C.equals(nomeConcetto)){
+                        if(!MandRolelist.contains(ruol.getIRI().getFragment()))
+                            OptRolelist.add(ruol.getIRI().getFragment());
+                    }
+                }
+            }
+            
+            if(!OptRolelist.isEmpty())infoOggettoConcetto.put("Optional_Roles", OptRolelist);
+            //FINE LETTURA DI EVENTUALI RUOLI OPZIONALI
+            /****************************/
+            //INIZIO LETTURA DI EVENTUALI SUPERCONCETTI
+            List<String> SuperConclist = new LinkedList<String>();
+            
+            Set<OWLClass> setsupercla = r.getSuperClasses(concettocorrente).getFlattened();
+            for(OWLClass supercla : setsupercla){
+                if(!supercla.getIRI().getFragment().equals("Thing")){
+                    SuperConclist.add(supercla.getIRI().getFragment());
+                }
+            }
+            
+            if(!SuperConclist.isEmpty())infoOggettoConcetto.put("Super_Concepts", SuperConclist);
+            //FINE LETTURA DI EVENTUALI SUPERCONCETTI
+            /*************/
+            List<LinkedList<String>> SubConclist = new LinkedList<LinkedList<String>>();//è un array di array
+            
+            
+            
+            
+            if(!SubConclist.isEmpty())infoOggettoConcetto.put("Sub_Concepts", SubConclist);
+            /*************/
             oggettoConcetto.put(nomeConcetto, infoOggettoConcetto);
             arrayconcetti.add(oggettoConcetto);
         }
@@ -213,22 +289,24 @@ public class EmptyJson {
     
     //INIZIO LAVORA RUOLI
     private static void LavoraRuoli(JSONArray arrayruoli,OWLOntology o) {
+        //INIZIALIZZAZIONE 
         OWLReasonerFactory rf = new org.semanticweb.HermiT.ReasonerFactory();
         OWLReasoner r = rf.createReasoner(o);
         List<String> listanomiRuoli = new LinkedList<String>();
         List<OWLObjectProperty> listaowlruoli = new LinkedList<OWLObjectProperty>();
-
         for (OWLObjectProperty cls : o.getObjectPropertiesInSignature()){
             listaowlruoli.add(cls);
             listanomiRuoli.add(cls.getIRI().getFragment());
         }
-        
+        //FINE INIZIALIZZAZIONE   
 
+        //PER OGNI RUOLO CREO LA STRUTTURA DATI CHE DIFFERISCE PER OGNUNO
         for (int i = 0; i < listanomiRuoli.size(); i++) {
             JSONObject oggettoRuolo = new JSONObject();
             JSONObject infoOggettoRuolo = new JSONObject();
             String nomeRuolo = listanomiRuoli.get(i);
             
+            //INZIO LETTURA DI EVENTUALI DOMINI
             List<String> Domlist= new LinkedList<String>();
             for( OWLObjectProperty el : listaowlruoli){
                 NodeSet<OWLClass> set = r.getObjectPropertyDomains(el);
@@ -240,7 +318,9 @@ public class EmptyJson {
                 }
             }
             if(!Domlist.isEmpty())infoOggettoRuolo.put("Domain", Domlist);
+            //FINE LETTURA DI EVENTUALI DOMINI
             
+            //INZIO LETTURA DI EVENTUALI RANGE
             List<String> Rangelist= new LinkedList<String>();
             for( OWLObjectProperty el : listaowlruoli){
                 NodeSet<OWLClass> set = r.getObjectPropertyRanges(el);
@@ -252,20 +332,40 @@ public class EmptyJson {
                 }
             }
             if(!Rangelist.isEmpty())infoOggettoRuolo.put("Range", Rangelist);
+            //FINE LETTURA DI EVENTUALI RANGE
             
-//                List<String> Functlist = new LinkedList<String>();
-//                List<String> SubRollist = new LinkedList<String>();
-//                List<String> SuperRollist = new LinkedList<String>();
-//                
-//                Functlist.add("Functional");
-//                
-//                if(!Functlist.isEmpty())infoOggettoRuolo.put("ObjectProperty", Functlist);
-//                if(!SubRollist.isEmpty())infoOggettoRuolo.put("Sub_Roles", SubRollist);
-//                if(!SuperRollist.isEmpty())infoOggettoRuolo.put("Super_Roles", SuperRollist);
-//               
-//                
-//            }
+            //INZIO LETTURA DI EVENTUALI FUNZIONALITA
+            List<String> Functlist = new LinkedList<String>();
+            for( OWLObjectProperty el : o.getObjectPropertiesInSignature()){
+                if(el.getIRI().getFragment().equals(nomeRuolo)){
+                    Set<OWLObjectPropertyAxiom> set = o.getAxioms(el);
+                    for(OWLObjectPropertyAxiom assioma : set){
+                        OWLAxiom Axiom = assioma.getAxiomWithoutAnnotations();
+                        if(Axiom.getAxiomType().toString().equals("FunctionalObjectProperty")){
+                            Functlist.add("Functional");
+                        }
+                        if(Axiom.getAxiomType().toString().equals("InverseFunctionalObjectProperty")){
+                            Functlist.add("InverseFunctional");
+                        }
+                    }
+                }
+                
+            }
+            if(!Functlist.isEmpty())infoOggettoRuolo.put("ObjectProperty", Functlist);
+            //FINE LETTURA DI EVENTUALI FUNZIONALITA
             
+            //INIZIO LETTURA DI EVENTUALI SOTTORUOLI
+            List<String> SubRollist = new LinkedList<String>();
+            //TODO
+            if(!SubRollist.isEmpty())infoOggettoRuolo.put("Sub_Roles", SubRollist);
+            //FINE LETTURA DI EVENTUALI SOTTORUOLI            
+
+            //INIZIO LETTURA DI EVENTUALI SUPERRUOLI
+            List<String> SuperRollist = new LinkedList<String>();
+            //TODO
+            if(!SuperRollist.isEmpty())infoOggettoRuolo.put("Super_Roles", SuperRollist);
+            //FINE LETTURA DI EVENTUALI SUPERRUOLI
+
             oggettoRuolo.put(nomeRuolo, infoOggettoRuolo);
             arrayruoli.add(oggettoRuolo);
         }
@@ -274,6 +374,7 @@ public class EmptyJson {
     
     //INIZIO LAVORA ATTRIBUTI
     private static void LavoraAttributi(JSONArray arrayattributi,OWLOntology o) {
+        //INIZIO LETTURA EVENTUALI FUNZIONALITA
         List<String> attributifunzionali = new LinkedList<String>();
         for (OWLDataProperty cls : o.getDataPropertiesInSignature()){
             Set<OWLDataPropertyAxiom> set = o.getAxioms(cls);
@@ -287,7 +388,7 @@ public class EmptyJson {
                 }
             }
         }
-        
+        //INIZIO LETTURA EVENTUALI FUNZIONALITA
         OWLReasonerFactory rf = new org.semanticweb.HermiT.ReasonerFactory();
         OWLReasoner r = rf.createReasoner(o);
         
@@ -299,12 +400,14 @@ public class EmptyJson {
             listanomiAttributi.add(cls.getIRI().getFragment());
         }
         
+        //PER OGNI ATTRIBUTO CREO LA STRUTTURA DATI CHE DIFFERISCE PER OGNUNO
         for (int i = 0; i < listanomiAttributi.size(); i++) {
             JSONObject oggettoAttributo = new JSONObject();
             JSONObject infoOggettoAttributo = new JSONObject();
             String nomeAttributo = listanomiAttributi.get(i);
-            List<String> Domlist= new LinkedList<String>();
             
+            //INIZIO LETTURA EVENTUALI DOMINI
+            List<String> Domlist= new LinkedList<String>();
             for( OWLDataProperty el : listaowlattributi){
                 NodeSet<OWLClass> set = r.getDataPropertyDomains(el);
                 for(OWLClass dominio : set.getFlattened()){
@@ -315,9 +418,11 @@ public class EmptyJson {
                 }
             }
             if(!Domlist.isEmpty())infoOggettoAttributo.put("Domain", Domlist);
+            //FINE LETTURA EVENTUALI DOMINI
             
             if(attributifunzionali.contains(nomeAttributo)) infoOggettoAttributo.put("ObjectProperty", "Functional");
             
+            //INIZIO LETTURA EVENTUALI OBBLIGATORIETà
             List<String> MandInlist = new LinkedList<String>();
             for (OWLClass cls : o.getClassesInSignature()){
                 Set<OWLSubClassOfAxiom> set = o.getSubClassAxiomsForSubClass(cls);
@@ -339,16 +444,10 @@ public class EmptyJson {
                 }
             }
             if(!MandInlist.isEmpty())infoOggettoAttributo.put("Mandatory_in", MandInlist);
+            //FINE LETTURA EVENTUALI OBBLIGATORIETà
             oggettoAttributo.put(nomeAttributo, infoOggettoAttributo);
             arrayattributi.add(oggettoAttributo);
         }
     }
     //FINE LAVORA ATTRIBUTI
-    
-        
-        
-        
-
-    
-    
 }
