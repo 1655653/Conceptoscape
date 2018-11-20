@@ -276,12 +276,148 @@ arrayattributi.add(oggettoAttributo);
 \end{verbatim}
 Alla fine dell'esecuzione di questo metodo, verranno inseriti tramite arrayattributi tutti gli attributi in obj, il quale sarà finalmente completo e andrà ad essere il contenuto del file json di output.
 
-\chapter{Parte 3 - Visualizzare i dati grazie a Cytoscape.js }
+\chapter{Parte 3 - Visualizzare i dati con Cytoscape.js }
+Ora che è stato generato un file che raggruppa in modo abbastanza semplice le informazioni su un'ontologia, verrà utilizzato HTML e Javascript per poter riuscire a visualizzare in Graphol il tutto.
 
-\section{Analisi del json}
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth]{demo}\\[3ex]
+\caption{ Screenshot della demo eseguita su Firefox 63.0.1. }
+\label{fig:largenenough}
+\end{figure}
 
-\section{Cytotools.js}
+Come si vede dalla figura, Per prima cosa si sceglie il file json desiderato, una volta cliccato su \textit{Load}, viene analizzato tramite JavaScript e viene proposto all'utente di scegliere il tipo di dato (concetto, ruolo o attributo) da visualizzare con tutte le sue relazioni. Una volta scelto il tipo di dato, si passa a scegliere l'entità specifica. Una volta finito il setup, se si clicca su \textit{Draw} viene disegnato il grafo. Il layout è molto simile per tutti e tre i tipi di dato ed è così composto: 
+\\Se il tipo di dato è un \textbf{concetto}, esso avrà nella parte superiore i superconcetti, in quella inferiore i sottoconcetti, a sinistra i ruoli e a destra gli attributi ai quali è collegato.
+\\Se invece il tipo di dato è un \textbf{ruolo}, avrà a sinistra tutti i concetti facenti parte del dominio, a destra quelli del codominio, superiormente e inferiormente super ruoli e sotto ruoli.
+\\Infine, se il dato è un \textbf{attributo}, a destra e sinistra andranno domini e range.
 
+\section{index.html}
+Per la parte di setup è stato sufficiente utilizzare una \textit{<form>} con diversi \textit{<button>} legati a diversi metodi. Se premuto, il \textit{<button> Load} fa eseguire il metodo LoadFile(). Grazie a \textit{window.FileReader} (non disponibile in alcuni tipi di browser), viene permesso di caricare il file e leggerlo. Come ultimo comando, LoadFile() chiama un'altro metodo, initialize(), il quale ha il compito di parsare il file json e compilare il form con i tipi di dato. Più precisamente, vengono create tre liste, una per tipo di dato. All'interno di ognuna vengono aggiunte le entità così da avere una suddivisione per tipo. Dopodiché, attraverso JQuery, quando l'utente sceglie di vedere un tipo di entità, il form viene compilato solo con gli elementi della lista relativa a quel tipo. 
+\begin{verbatim}
+ $('select[name = "ConOrRolOrAtt"]').live("change",function(){
+     if($('select[name = "ConOrRolOrAtt"] option:selected').text() == "Role") {
+          tipo = "starRole";
+          $('select[name = "lista"]').empty();
+          $('select[name = "lista"]').append(new Option("---",0));
+          $.each(listaruoli,function(index,elem){
+          	$('select[name = "lista"]').append(new Option(elem,index));
+     	});
+      }
+      //..
+      //...
+  }
+\end{verbatim}
+Questo snippet di codice fa compilare l'elemento \textit{<select} [name = "lista"]\textit{>} con tutti gli elementi di \textit{listaruoli}, la lista dentro la quale sono contenuti tutti i ruoli dell'ontologia. Ciò avviene se è stato scelto "Role" all'interno di \textit{<select}[name = "ConOrRolOrAtt"]\textit{>} , quindi l'utente desidera scegliere uno tra tutti i ruoli dell'ontologia. La stessa cosa viene fatta con attributi e concetti.
+\\Infine, se cliccato, \textit{<button> Draw} chiama il metodo go(), il quale ha il compito di gestire la "Fase Cytoscape.js" del progetto.
+\begin{verbatim}
+function go(){
+      var name;
+      var cy;
+     //INIZIALIZZAZIONE DELL ELEMENTO CY 
+     cy = cytoscape({
+       container: document.getElementById('cyo'),
+       style: stile
+     });
+     //PARSING DEL JSON
+     readTextFile(name, jparse);
+            
+    //INIZIO GESTIONE DEL LAYOUT         
+    cy.layout({
+        name:'preset',
+    }).run(); 
+            
+    if(tipo == 'starConcept') GrapholyConcept();
+    else if(tipo == 'starRole') GrapholyRole();
+    else if(tipo == 'starAttribute') GrapholyAttribute();
+
+    cy.fit(cy.$id(soggetto),280);
+
+    // GESTIONE NODI FAKE E LABEL
+
+    FakeAttrGen();
+    FakeRoleGen();
+    FakeManager();
+    fixSizeLabel()
+}
+\end{verbatim}
+Per prima cosa viene inizializzata la variabile cy, l'elemento rappresentante l'intero grafo. Successivamente si passa a parsare il file json, tramite \textit{jparse()} (passato come argomento alla funzione readTextFile). Come si vedrà nella sezione successiva, \textit{jparse()} è il vero e proprio manager del grafo, poiché crea i nodi e va cercare tutte le relazioni tra gli elementi presi in considerazione. 
+\\A seconda del contenuto della variabile \textit{tipo}, è chiamato un metodo diverso di Grapholy, che dispone i nodi creati con il layout descritto ad inizio capitolo. In seguito viene centrato bene l'elemento protagonista tramite cy.fit().\\
+C'è da dire che anche se Cytoscape.js è stato davvero fondamentale per questo progetto, ha però delle limitazioni. Infatti l'ultima parte del metodo go() crea degli eventuali nodi falsi al fine di disegnare poligoni particolari (come ad esempio ruoli e attributi funzionali) e gestisce il loro movimento. Tutti questi metodi sono raggruppati in cytotools.js, una piccola libreria costruita con l'intento di allineare Cytoscape.js alle regole di Graphol. Come ultimo passaggio, verranno analizzate le parti interessanti di questi metodi.
+
+\section{cytotools.js}
+I metodi all'interno di questo file posso essere suddivisi in tipi.
+\\I metodi di tipo \textbf{Grapholy}, come anche scritto anche precedentemente, dispongono i nodi creati tramite un layout definito dal tipo di entità. Esistono quindi tre metodi Grapholy: \textit{GrapholyConcept(), GrapholyRole()} e \textit{GrapholyAttribute()}.
+Questi hanno in comune la struttura. \\Per esempio in  \textit{GrapholyConcept()} si ha:
+\begin{verbatim}
+var attributes = cy.$('node[type = "simpleAttribute"],[type = "complexAttribute"]');
+
+
+
+var roles = cy.$(
+              'node[type = "simpleRole"],
+              [type = "doubleSimpleRole"],
+              [type = "complexRole"],
+              [type = "doubleComplexRole"]'
+               );
+var subouos = cy.$('node[type = "subOuo"],
+                  [type = "subAndornot"],
+                  [type = "simpleSubConcept"]'
+               );
+var superconcepts = cy.$('node[type = "superConcept"]');
+   
+var star = cy.$id(soggetto);
+var starx = star.position('x');
+var stary = star.position('y');
+\end{verbatim}
+Tramite i selettori di cytoscape.js vengono prese e create le variabili raffiguranti tutti i nodi da disporre sullo schermo.
+Inoltre, vengono prese le coordinate del concetto protagonista.
+\\Successivamente, per ogni gruppo di nodi (in questo caso attributi, ruoli, super  e sotto concetti) verrà applicato un algoritmo di posizionamento basato sulle variabili \textit{starx} e \textit{stary}. Questi algoritmi sono stati pensati per rendere tutto il più "pulito" possibile. Quindi nel caso di numerose entità dello stesso tipo, il disegno complessivo apparirà più "largo" ma più chiaro.
+\\Oltre ai \textit{Grapholy}, ci sono le funzioni del tipo \textbf{Generator} che seguendo lo stile del nodo, li disegnano.
+Di questo tipo sono: \textit{RoleGenerator(), ConceptGenerator(), SuperConceptGenerator(), SubConceptGenerator(), FakeRoleGen(), FakeAttrGen(), AttrRoleGenerator()}.
+\\Prendiamo in esame la struttura di quest'ultimo:
+\begin{verbatim}
+function AttrRoleGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ 
+	//idSrc è l'id del nodo sorgente
+	//idTargt è l'id del nodo d'arrivo
+	//arrstyle è lo stile dell'arco tra l'exists e il target (mandatorio, opzionale)
+	//colorExists è bianco se dominio e nero per range 
+	//typ è il tipo del nodo sorgente
+    cy.add([
+        { group:"nodes",data: { id: idSrc, type: typ }}, //creo nodo giusto
+        { group:"nodes",data: { id: 'exists' +idSrc+idTargt, type: colorExists }}, //creo nodo exists
+
+        {   
+            group:"edges",
+            data: { // creo edge nodo--->exists
+            id: 'edgeExists' +idSrc+idTargt, 
+            source: idSrc,
+            target: 'exists' +idSrc+idTargt,
+            type: 'descendant' } 
+        },
+        { 
+            group:"edges",                    
+            data: { //creo edge exists--->target
+            id: 'edgetarget' +idSrc+idTargt, 
+            source: 'exists' +idSrc+idTargt,
+            target: idTargt,
+            type: arrstyle } 
+        }
+
+    ]);
+}
+\end{verbatim}
+Questi tipi di funzioni utilizzano quasi esclusivamente cytoscape.js. In quest'esempio infatti vengono aggiunti 2 nodi e relativi archi. Come si può notare, questi metodi sono abbastanza slegati dalle regole Graphol a causa appunto del disallineamento tra i linguaggi. Se utilizzati correttamente però, portano a ottimi risultati. Per esempio, una sua chiamata è;
+\begin{verbatim}
+AttrRoleGenerator(singleAttr,soggetto,'normal','existsW','simpleAttribute');
+//singleAttr è un attributo 
+//soggetto è il concetto/ruolo protagonista
+//'normal' indica il tipo di freccia opzionale
+//'existsW' dominio
+//simpleAttribute vuol dire che non è un attributo funzionale
+\end{verbatim}
+Tutti gli altri metodi di questo tipo sono quindi collegati dall'uso massiccio di cytoscape.js e nella creazione di nodi particolari.
+\\Infine, come ultimo tipo di funzioni, ci sono quelle \textbf{manageriali} come \textit{FakeManager(), readTextFile()} e la più importante \textit{jparse()}.
+Come già accennato, e come suggerisce il nome, jparse ha il compito di parsare ed analizzare il file json scegliendo quando chiamare un metodo e con quali parametri.
 
 
 \backmatter
