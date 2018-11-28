@@ -14,91 +14,144 @@
 </head>
 
 <body>
+    
     <div id='cc'>
-        <em>Choose the type</em>
-        <select name = "conorrol">
-            <option>---</option>
-        </select>
-        <em> and the entity</em>
-        <select name = "lista">
-            <option>---</option>
-        </select>
+        <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+            <em>1. Upload your file</em>
         
-        <button onclick= "go()">Draw</button>
-
-        <!-- <button class="btn btn-inside btn-boarder"><img src="https://i.cloudup.com/gBzAn-oW_S-2000x2000.png" width="64px" height="64px" id="plane"></button>
-        <div class="bg"><img src="https://i.cloudup.com/2ZAX3hVsBE-3000x3000.png" id="bg" width="32px" height="32px" style="opacity:0;"></div>
-        <div class="around around-boarder" onclick="go(); ani(); anitwo();"></div> -->
+            <input type='file' id='fileinput'>
+            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+            
+            <em>2. Choose the type</em>
+            <select name = "conorrol">
+                <option>---</option>
+            </select>
+            <em>3. Choose the entity</em>
+            <select name = "lista">
+                <option>---</option>
+            </select>
+            
+            <button type="button" onclick= "go()">Draw</button>
+        </form>
     </div>
     
     
     <div id = 'cyo'></div>
 
     <script>
-        
-        //INIZIO INTERAZIONE
-        var listaconcetti = [];
-        var listaruoli = [];
-        readTextFile("book.json", function(text){
-            var data = JSON.parse(text);
-            for (el in data.Concepts){
-                var obj = data.Concepts[el];
-                for(id in obj){
-                    listaconcetti.push(id);
-                }
-            }
-            for (el in data.Roles){
-                var obj = data.Roles[el];
-                for(id in obj){
-                    listaruoli.push(id);
-                }
-            }
-        });
-
+        var name;
         var tipo;
         var soggetto;
-        $.each(["Concept","Role"],function(index,elem){
-            $('select[name = "conorrol"]').append(new Option(elem,index));
-        });
-        
-        $('select[name = "conorrol"]').live("change",function(){
-            if($('select[name = "conorrol"] option:selected').text() == "Role") {
-                tipo = "starRole";
-                $('select[name = "lista"]').empty();
-                $('select[name = "lista"]').append(new Option("---",0));
-                $.each(listaruoli,function(index,elem){
-                    $('select[name = "lista"]').append(new Option(elem,index));
-                });
-            }
-            if($('select[name = "conorrol"] option:selected').text() == "Concept") {
-                tipo = "starConcept";
-                $('select[name = "lista"]').empty();
-                $('select[name = "lista"]').append(new Option("---",0));
-                $.each(listaconcetti,function(index,elem){
-                    $('select[name = "lista"]').append(new Option(elem,index));
-                });
-            }
-        })
-
-        $('select[name = "lista"]').live("change",function(){
-            var x = $('select[name = "lista"] option:selected').text();
-            if(x != "---") soggetto = x;
-        })
-
-
-        //CREAZIONE DELL ELEMENTO CY 
         var cy;
+
+        function loadFile() {
+            var input, file, fr
+            
+            if (typeof window.FileReader !== 'function') {
+                alert("The file API isn't supported on this browser yet.");
+                return;
+            }
+
+            input = document.getElementById('fileinput');
+            if (!input) {
+                alert("Um, couldn't find the fileinput element.");
+            }
+            else if (!input.files) {
+                alert("This browser doesn't seem to support the `files` property of file inputs.");
+            }
+            else if (!input.files[0]) {
+                alert("Please select a file before clicking 'Load'");
+            }
+            else {
+                file = input.files[0];
+                fr = new FileReader();
+                name = file.name;
+                fr.onload = receivedText; //metodo
+                fr.readAsText(file);
+            }
+
+            function receivedText(e) {
+                let lines = e.target.result;
+                console.log(name);
+                initialize(name,lines);
+            }
+
+        }
+        function initialize(name,text){
+            //INIZIO INTERAZIONE
+            var listaconcetti = [];
+            var listaruoli = [];
+            var listaattributi = [];
+            readTextFile(name, function(text){
+                var data = JSON.parse(text);
+                for (el in data.Concepts){
+                    var obj = data.Concepts[el];
+                    for(id in obj){
+                        listaconcetti.push(id);
+                    }
+                }
+                for (el in data.Roles){
+                    var obj = data.Roles[el];
+                    for(id in obj){
+                        listaruoli.push(id);
+                    }
+                }
+                for (el in data.Attributes){
+                    var obj = data.Attributes[el];
+                    for(id in obj){
+                        listaattributi.push(id);
+                    }
+                }
+            });
+            $('select[name = "conorrol"]').empty();
+            $.each(["---","Concept","Role","Attribute"],function(index,elem){
+                $('select[name = "conorrol"]').append(new Option(elem,index));
+            });
+            
+            $('select[name = "conorrol"]').live("change",function(){
+                if($('select[name = "conorrol"] option:selected').text() == "Role") {
+                    tipo = "starRole";
+                    $('select[name = "lista"]').empty();
+                    $('select[name = "lista"]').append(new Option("---",0));
+                    $.each(listaruoli,function(index,elem){
+                        $('select[name = "lista"]').append(new Option(elem,index));
+                    });
+                }
+                else if($('select[name = "conorrol"] option:selected').text() == "Concept") {
+                    tipo = "starConcept";
+                    $('select[name = "lista"]').empty();
+                    $('select[name = "lista"]').append(new Option("---",0));
+                    $.each(listaconcetti,function(index,elem){
+                        $('select[name = "lista"]').append(new Option(elem,index));
+                    });
+                }
+                else if($('select[name = "conorrol"] option:selected').text() == "Attribute") {
+                    tipo = "starAttribute";
+                    $('select[name = "lista"]').empty();
+                    $('select[name = "lista"]').append(new Option("---",0));
+                    $.each(listaattributi,function(index,elem){
+                        $('select[name = "lista"]').append(new Option(elem,index));
+                    });
+                }
+            })
+
+            $('select[name = "lista"]').live("change",function(){
+                var x = $('select[name = "lista"] option:selected').text();
+                if(x != "---") soggetto = x;
+            })
+        }
+
+        
         function go(){
+            //CREAZIONE DELL ELEMENTO CY 
             cy = cytoscape({
                 container: document.getElementById('cyo'),
                 style: stile
             });
-        
-            
             
             //INIZIO PARSING DEL JSON
             
-            readTextFile("book.json", jparse);
+            readTextFile(name, jparse);
 
             //FINE PARSING DEL JSON
             
@@ -106,26 +159,25 @@
             
             cy.layout({
                 name:'preset',
-
             }).run(); 
 
-            var nodes = cy.nodes('node');
+            
 
-            if(tipo == 'starConcept') GrapholyConcept(nodes);
-            else GrapholyRole(nodes);
+            if(tipo == 'starConcept') GrapholyConcept();
+            else if(tipo == 'starRole') GrapholyRole();
+            else if(tipo == 'starAttribute') GrapholyAttribute();
 
-            cy.fit(cy.$id(soggetto),300);
+            cy.fit(cy.$id(soggetto),280);
             //FINE GESTIONE LAYOUT
             
-            //INIZIO GESTIONE NODI FAKE 
+            //INIZIO GESTIONE NODI FAKE E LABEL
 
             FakeAttrGen();
             FakeRoleGen();
             FakeManager();
             fixSizeLabel()
-            
 
-            //FINE GESTIONE NODI FAKE
+            //FINE GESTIONE NODI FAKE E LABEL
         }
         
     </script>

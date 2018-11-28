@@ -1,5 +1,5 @@
 //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL
-function GrapholyConcept( nodes ){
+function GrapholyConcept(){
     var attributes = cy.$('node[type = "simpleAttribute"],[type = "complexAttribute"]');
     var roles = cy.$('node[type = "simpleRole"],[type = "doubleSimpleRole"],[type = "complexRole"],[type = "doubleComplexRole"]');
     var subouos = cy.$('node[type = "subOuo"],[type = "subAndornot"],[type = "simpleSubConcept"]');
@@ -365,7 +365,7 @@ function AttrRoleGenerator( idSrc, idTargt, arrstyle, colorExists,typ){ //crea n
 }
 
 //GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL 
-function GrapholyRole( nodes ){
+function GrapholyRole(){
     var concepts = cy.$('node[type = "simpleConcept"]');
     var subroles = cy.$('node[hint = "sub"]');
     var superoles = cy.$('node[hint = "super"]');
@@ -396,7 +396,7 @@ function GrapholyRole( nodes ){
 
             nodeExists.position({
                 x: starx + 100,
-                y: stary + n + 7
+                y: stary + n
             });
 
             node.position({
@@ -459,6 +459,67 @@ function GrapholyRole( nodes ){
             y:stary - 80
         })
         
+    }
+
+}
+
+//GRAPHOLY SERVE PER CREARE IL LAYOUT IN STILE GRAPHOL 
+function GrapholyAttribute(){
+    var concepts = cy.$('node[type = "simpleConcept"]');
+    var ranes = cy.$('node[type = "value_domain"]');
+
+    var star = cy.$id(soggetto);
+    var starx = star.position('x');
+    var stary = star.position('y');
+    var n = 0;
+    var mp = 0;
+    var md = 0;
+    var m = 0;
+    var k = 0;
+    for (let i = 0; i < concepts.length; ++i){
+        const node = concepts[i];
+        nodeConcid = node.data('id');
+        var nodeExists = cy.$id('exists'+nodeConcid+soggetto);
+        
+        if( i % 2 != 0 ) {
+            n = 100;
+            if(i !=1 ) md += 40;
+            m = md;
+            // k = 10
+        }
+        else if( i % 2 == 0 ){
+            n = -100;
+            if(i !=0 ) mp += 40;
+            m = mp
+            // k = -100
+        } 
+        nodeExists.position({
+            x:starx + n,
+            y:stary + m 
+        })
+
+        node.position({
+            x:nodeExists.position('x') + n,
+            y:nodeExists.position('y')
+        })
+        
+    }
+    for (let i = 0; i < ranes.length; ++i){
+        const node = ranes[i];
+        nodeConcid = node.data('id');
+        var nodeExists = cy.$id('exists'+nodeConcid+soggetto);
+        nodeExists.position({
+            x:starx + k,
+            y:stary - 100 
+        })
+
+        node.position({
+            x:nodeExists.position('x'),
+            y:nodeExists.position('y') - 100
+        })
+
+        k+= -80
+
     }
 
 }
@@ -564,6 +625,32 @@ function RoleGenerator(note,srcID,typeRole,ouoStarArr,typeOuo,roleOuoArr,aonName
     }
 }
 
+//sistema le label troppo grandi
+function fixSizeLabel(){
+    var conc = cy.$('node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"],[type = "simpleSubConcept"],[type = "simpleConcept"]');
+    for (let i = 0; i < conc.length; i++) {
+        const element = conc[i];
+        var lab = element.style('label');
+        if(lab.length>11){
+            element.style('font-size',7);
+        }
+        
+    }
+}
+
+//readTextFile serve per leggere il json
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
 //PARSING DEL FILE JSON E CREAZIONE DEI NODI
 function jparse(text){
     var data = JSON.parse(text);
@@ -615,11 +702,13 @@ function jparse(text){
                             maStarRole.push(star.Mandatory_Roles[h]);
                         }
                     }
+                    
                     if( star.Optional_Roles != undefined){
                         for(h in star.Optional_Roles ){
                             opStarRole.push(star.Optional_Roles[h]);
                         }
                     }
+
                 }
             }
         }
@@ -686,14 +775,17 @@ function jparse(text){
                         }
                         else{
                             AttrRoleGenerator(singleAttr,soggetto,'doublenormal','existsW','simpleAttribute');
+
                         }
                     }
                     else{
                         if(funct == true){
                             AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','complexAttribute');
+
                         }
                         else{
                             AttrRoleGenerator(singleAttr,soggetto,'antinormal','existsW','simpleAttribute');
+
                         }
                     }
                 }
@@ -758,7 +850,7 @@ function jparse(text){
                             
                         }
                     }
-                    var ex;
+                    var ex = 'existsW';
                     var arr = 'normal';
                     var complexity;
                     if(dom == true){
@@ -846,7 +938,7 @@ function jparse(text){
     }
     //*****************************
     //ho starRole
-    else{
+    else if(tipo == 'starRole'){
         for (el in data.Roles){
             var obj = data.Roles[el];
             for(id in obj){
@@ -884,7 +976,7 @@ function jparse(text){
                             for(y in data.Concepts){
                                 var manCpt = data.Concepts[y];
                                 for(z in manCpt){
-                                    if(z == domConcept){
+                                    if(z == domConcept && manCpt[z].Mandatory_Roles != undefined){
                                         var manRol = manCpt[z].Mandatory_Roles;
                                         for (let i = 0; i < manRol.length; i++) {
                                             if (manRol[i] == soggetto)
@@ -1002,32 +1094,61 @@ function jparse(text){
             }
         }
     }
-}
+    //*****************************
+    //ho starAttribute
+    else{
+        for (el in data.Attributes){
+            var obj = data.Attributes[el];
+            for(id in obj){
+                if (id == soggetto){
+                    var star = obj[id];
+                    var typpo = "simpleAttribute";
+                    if(star.ObjectProperty == "Functional") typpo = "complexAttribute";
+                    cy.add([
+                        {
+                            group:'nodes',
+                            data: { id: soggetto, type: typpo},
+                        }
+                    ]);
+                    var both = false;
+                    var dom = [];
+                    if(star.Range != undefined){
+                        for(x in star.Range){
+                            var domvalue = star.Range[x];
+                            ConceptGenerator( domvalue, soggetto, "antinormal", 'existsB','value_domain',"antidescendant")
+                        }
+                    }
+                    if(star.Domain != undefined){
+                        for(x in star.Domain){
+                            var domConcept = star.Domain[x];
+                            for(y in star.Mandatory_in){
+                                var concMan = star.Mandatory_in[y];
+                                if(domConcept == concMan) both = true; 
+                            }
+                            if (both) ConceptGenerator( domConcept, soggetto, "doublenormal", 'existsW','simpleConcept',"antidescendant")
+                            else {
+                                ConceptGenerator( domConcept, soggetto, "antinormal", 'existsW','simpleConcept',"antidescendant")
+                            }
+                            both = false;
+                            dom.push(domConcept);
+                        }
+                    }
 
-//sistema le label troppo grandi
-function fixSizeLabel(){
-    var conc = cy.$('node[type = "starConcept"],[type = "subConcept"],[type = "superConcept"],[type = "simpleSubConcept"],[type = "simpleConcept"]');
-    for (let i = 0; i < conc.length; i++) {
-        const element = conc[i];
-        var lab = element.style('label');
-        if(lab.length>11){
-            element.style('font-size',7);
+                    if(star.Mandatory_in != undefined){
+                        for(x in star.Mandatory_in){
+                            manConcept = star.Mandatory_in[x];
+                            var present = false;
+                            for (let i = 0; i < dom.length; i++) {
+                                const doma = dom[i];
+                                if(doma == manConcept) present = true;
+                            }
+                            if(!present) ConceptGenerator( manConcept, soggetto, "normal", 'existsW','simpleConcept',"antidescendant")
+                        }
+                    }
+
+
+                }
+            }
         }
-        
     }
 }
-
-//readTextFile serve per leggere il json
-function readTextFile(file, callback) {
-    var rawFile = new XMLHttpRequest();
-    rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function() {
-        if (rawFile.readyState === 4 && rawFile.status == "200") {
-            callback(rawFile.responseText);
-        }
-    }
-    rawFile.send(null);
-}
-
-
