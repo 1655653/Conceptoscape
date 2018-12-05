@@ -1,0 +1,83 @@
+Prefix(:=<http://www.dis.uniroma1.it/super-heroes/>)
+Prefix(sh:=<http://www.dis.uniroma1.it/super-heroes/#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<http://www.dis.uniroma1.it/super-heroes/>
+
+Declaration(Class(sh:Ability))
+Declaration(Class(sh:Character))
+Declaration(Class(sh:Extraterrestrial))
+Declaration(Class(sh:Human))
+Declaration(Class(sh:Metahuman))
+Declaration(Class(sh:Superhero))
+Declaration(Class(sh:Superpower))
+Declaration(Class(sh:Villain))
+Declaration(ObjectProperty(sh:has_ability))
+Declaration(ObjectProperty(sh:is_enemy_of))
+Declaration(DataProperty(sh:name))
+Declaration(DataProperty(sh:origin_planet_name))
+Declaration(Datatype(xsd:string))
+
+############################
+#   Data Properties
+############################
+
+# Data Property: sh:name (sh:name)
+
+FunctionalDataProperty(sh:name)
+DataPropertyRange(sh:name xsd:string)
+
+# Data Property: sh:origin_planet_name (sh:origin_planet_name)
+
+FunctionalDataProperty(sh:origin_planet_name)
+DataPropertyRange(sh:origin_planet_name xsd:string)
+
+
+
+############################
+#   Classes
+############################
+
+# Class: sh:Ability (sh:Ability)
+
+SubClassOf(sh:Ability DataSomeValuesFrom(sh:name rdfs:Literal))
+
+# Class: sh:Character (sh:Character)
+
+SubClassOf(sh:Character DataSomeValuesFrom(sh:name rdfs:Literal))
+
+# Class: sh:Extraterrestrial (sh:Extraterrestrial)
+
+EquivalentClasses(sh:Extraterrestrial DataSomeValuesFrom(sh:origin_planet_name rdfs:Literal))
+
+# Class: sh:Human (sh:Human)
+
+
+# Class: sh:Metahuman (sh:Metahuman)
+
+
+# Class: sh:Superhero (sh:Superhero)
+
+DisjointClasses(sh:Superhero sh:Villain)
+
+# Class: sh:Superpower (sh:Superpower)
+
+SubClassOf(sh:Superpower sh:Ability)
+
+# Class: sh:Villain (sh:Villain)
+
+EquivalentClasses(sh:Villain ObjectSomeValuesFrom(sh:is_enemy_of owl:Thing))
+
+
+SubClassOf(ObjectUnionOf(sh:Extraterrestrial sh:Human sh:Metahuman) sh:Character)
+SubClassOf(ObjectUnionOf(sh:Superhero sh:Villain) sh:Character)
+SubClassOf(ObjectSomeValuesFrom(sh:has_ability owl:Thing) sh:Character)
+SubClassOf(ObjectSomeValuesFrom(ObjectInverseOf(sh:has_ability) owl:Thing) sh:Ability)
+SubClassOf(ObjectSomeValuesFrom(ObjectInverseOf(sh:is_enemy_of) owl:Thing) sh:Superhero)
+DisjointClasses(sh:Extraterrestrial sh:Human sh:Metahuman)
+)
