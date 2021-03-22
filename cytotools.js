@@ -1151,3 +1151,60 @@ function jparse(data){
         }
     }
 }
+
+
+function demoinit(){
+    data = {   
+        "Prefix_Map":[
+            {"Prefix":"","IRI":"http://www.obdasystems.com/books/"},
+            {"Prefix":"owl","IRI":"http://www.w3.org/2002/07/owl#"},
+            {"Prefix":"rdf","IRI":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
+            {"Prefix":"xml","IRI":"http://www.w3.org/XML/1998/namespace"},
+            {"Prefix":"xsd","IRI":"http://www.w3.org/2001/XMLSchema#"},
+            {"Prefix":"rdfs","IRI":"http://www.w3.org/2000/01/rdf-schema#"}
+        ],
+        "Concepts":[
+            {"AudioBook":{"Super_Concepts":["Book"]}},
+            {"Author":{
+                "Mandatory_Attributes":["name"],
+                "Sub_Concepts":[["EmergingWriter"]],
+                "Optional_Roles":["writtenBy"]}
+            },
+            {"Book":{
+                "Mandatory_Attributes":["genre","title"],
+                "Mandatory_Roles":["writtenBy"],
+                "Optional_Roles": ["hasEdition"],
+                "Sub_Concepts":[["AudioBook","E_Book","PrintedBook"],["UneditedBook"]]}
+            },
+            {"E_Book":{"Super_Concepts":["Book"]}},
+            {"EconomicEdition":{"Super_Concepts":["Edition"]}},
+            {"Edition":{
+                "Mandatory_Attributes":["dateOfPublication","editionNumber"],
+                "Mandatory_Roles":["hasEdition","editedBy"],
+                "Sub_Concepts":[["SpecialEdition","EconomicEdition"]]}
+            },
+            {"Editor":{"Mandatory_Attributes":["name"],"Optional_Roles":["editedBy"]}},
+            {"EmergingWriter":{"Super_Concepts":["Author"]}},
+            {"PrintedBook":{"Super_Concepts":["Book"]}},
+            {"SpecialEdition":{"Super_Concepts":["Edition"]}},
+            {"UneditedBook":{"Super_Concepts":["Book"]}}
+        ],
+        "Roles":[
+            {"editedBy":{"Domain":["Edition"],"Range":["Editor"],"ObjectProperty":["Functional"]}},
+            {"hasEdition":{"Domain":["Book"],"Range":["Edition"],"ObjectProperty":["InverseFunctional"]}},
+            {"writtenBy":{"Domain":["Book"],"Range":["Author"]}}    
+        ],
+        "Attributes":[
+            {"dateOfPublication":{"Domain":["Edition"],"ObjectProperty":"Functional"}},
+            {"editionNumber":{"Domain":["Edition"],"ObjectProperty":"Functional"}},
+            {"genre":{"Domain":["Book"],"ObjectProperty":"Functional"}},
+            {"title":{"Domain":["Book"],"ObjectProperty":"Functional"}},
+            {"name":{"ObjectProperty":"Functional"}}
+        ],
+        "Disjoint_Classes":[
+            ":AudioBook :E_Book :PrintedBook"
+        ]
+    }
+
+    initialize(data)
+}

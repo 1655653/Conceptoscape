@@ -46,6 +46,9 @@
         var soggetto;
         var cy;
         var data;
+        var demo = false
+        if(demo) demoinit() //ONLY FoR DEMO PURPOUSE
+        
         document.getElementById('contentFile').onchange = function(evt) {
             try {
                 let files = evt.target.files;
