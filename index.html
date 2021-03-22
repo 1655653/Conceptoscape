@@ -46,7 +46,8 @@
         var soggetto;
         var cy;
         var data;
-        var demo = false
+
+        var demo = true
         if(demo) demoinit() //ONLY FoR DEMO PURPOUSE
         
         document.getElementById('contentFile').onchange = function(evt) {
@@ -63,7 +64,12 @@
                     console.log('FILE CONTENT', event.target.result);
                     data = JSON.parse(event.target.result)
                     console.log(data.Concepts)
-                    initialize(data)
+                    try{
+                        initialize(data)
+                    }
+                    catch (err) {
+                        console.error(err);
+                    }
                 };
                 reader.readAsText(file);
 
@@ -72,40 +78,7 @@
             }
         }
 
-        function loadFile() {
-            var input, file, fr
-            
-            if (typeof window.FileReader !== 'function') {
-                alert("The file API isn't supported on this browser yet.");
-                return;
-            }
-
-            input = document.getElementById('fileinput');
-            if (!input) {
-                alert("Um, couldn't find the fileinput element.");
-            }
-            else if (!input.files) {
-                alert("This browser doesn't seem to support the `files` property of file inputs.");
-            }
-            else if (!input.files[0]) {
-                alert("Please select a file before clicking 'Load'");
-            }
-            else {
-                file = input.files[0];
-                fr = new FileReader();
-                name = file.name;
-                fr.onload = receivedText; //metodo
-                fr.readAsText(file);
-            }
-
-            function receivedText(e) {
-                let lines = e.target.result;
-                console.log(name);
-                initialize(name,lines);
-            }
-
-        }
-        
+              
         function initialize(data){
             //INIZIO INTERAZIONE
             var listaconcetti = [];
