@@ -17,12 +17,13 @@
     
     <div id='cc'>
         <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
-            <em>1. Upload your file</em>
+            <em id ="upload">1. Upload your file</em>
         
             <!-- <input type='file' id='fileinput'>
             <input type='button' id='btnLoad' value='Load' onclick='loadFile();'> -->
             <input id="contentFile" type="file" accept="application/json" />
-
+            <label id = "dm" for="contentFile" class="hidden">prova.json already loaded</label>
+            <button type="button" id="demoButton" onclick= "demoF()"></button>
             
             <em>2. Choose the type</em>
             <select name = "conorrol">
@@ -34,6 +35,7 @@
             </select>
             
             <button type="button" onclick= "go()">Draw</button>
+            
         </form>
     </div>
     
@@ -46,9 +48,29 @@
         var soggetto;
         var cy;
         var data;
-
-        var demo = true
-        if(demo) demoinit() //ONLY FoR DEMO PURPOUSE
+        var demo = false
+        function demoF(){
+            demo = !demo
+            mode =""
+            if(demo) {
+                data = demoinit() //ONLY FoR DEMO PURPOUSE
+                initialize(data)
+                document.getElementById('contentFile').style.display = 'none';
+                document.getElementById('upload').innerHTML= "<del>1. Upload your file</del>"
+                document.getElementById('dm').style.display = 'inline';
+                mode ="auto"
+            }
+            else{
+                data = ""
+                document.getElementById('dm').style.display = 'none';
+                document.getElementById('upload').innerHTML= "1. Upload your file"
+                document.getElementById('contentFile').style.display = 'inline';
+                mode ="manual"
+            }
+            document.getElementById('demoButton').innerHTML="mode = "+mode
+        }
+        demoF()
+        
         
         document.getElementById('contentFile').onchange = function(evt) {
             try {

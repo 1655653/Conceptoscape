@@ -1206,5 +1206,6 @@ function demoinit(){
         ]
     }
 
-    initialize(data)
+    return data
+    
 }
