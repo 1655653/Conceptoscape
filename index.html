@@ -7,7 +7,7 @@
     <title>Conceptoscape</title>
 
     <script language="JavaScript" type="text/javascript" src='stile.js'></script>
-    <script language="JavaScript" type="text/javascript" src='jquery-1.8.3.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script language="JavaScript" type="text/javascript" src='cytoscape.js'></script>
     <script language="JavaScript" type="text/javascript" src='cytotools.js'></script>
     <link rel="stylesheet" type="text/css" href="cyss.css"/>
@@ -19,8 +19,10 @@
         <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
             <em>1. Upload your file</em>
         
-            <input type='file' id='fileinput'>
-            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+            <!-- <input type='file' id='fileinput'>
+            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'> -->
+            <input id="contentFile" type="file" accept="application/json" />
+
             
             <em>2. Choose the type</em>
             <select name = "conorrol">
@@ -43,6 +45,29 @@
         var tipo;
         var soggetto;
         var cy;
+        var data;
+        document.getElementById('contentFile').onchange = function(evt) {
+            try {
+                let files = evt.target.files;
+                if (!files.length) {
+                    alert('No file selected!');
+                    return;
+                }
+                let file = files[0];
+                let reader = new FileReader();
+                const self = this;
+                reader.onload = (event) => {
+                    console.log('FILE CONTENT', event.target.result);
+                    data = JSON.parse(event.target.result)
+                    console.log(data.Concepts)
+                    initialize(data)
+                };
+                reader.readAsText(file);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         function loadFile() {
             var input, file, fr
@@ -77,13 +102,12 @@
             }
 
         }
-        function initialize(name,text){
+        
+        function initialize(data){
             //INIZIO INTERAZIONE
             var listaconcetti = [];
             var listaruoli = [];
             var listaattributi = [];
-            readTextFile(name, function(text){
-                var data = JSON.parse(text);
                 for (el in data.Concepts){
                     var obj = data.Concepts[el];
                     for(id in obj){
@@ -102,7 +126,6 @@
                         listaattributi.push(id);
                     }
                 }
-            });
             $('select[name = "conorrol"]').empty();
             $.each(["---","Concept","Role","Attribute"],function(index,elem){
                 $('select[name = "conorrol"]').append(new Option(elem,index));
@@ -151,7 +174,7 @@
             
             //INIZIO PARSING DEL JSON
             
-            readTextFile(name, jparse);
+            jparse(data)
 
             //FINE PARSING DEL JSON
             
@@ -167,7 +190,7 @@
             else if(tipo == 'starRole') GrapholyRole();
             else if(tipo == 'starAttribute') GrapholyAttribute();
 
-            cy.fit(cy.$id(soggetto),280);
+            cy.fit(cy.$id(soggetto),320);//ZOOM
             //FINE GESTIONE LAYOUT
             
             //INIZIO GESTIONE NODI FAKE E LABEL

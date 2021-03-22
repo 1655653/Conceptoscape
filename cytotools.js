@@ -652,8 +652,7 @@ function readTextFile(file, callback) {
 }
 
 //PARSING DEL FILE JSON E CREAZIONE DEI NODI
-function jparse(text){
-    var data = JSON.parse(text);
+function jparse(data){
     //ho starConcept
     if(tipo == 'starConcept'){
         for (el in data.Concepts){
